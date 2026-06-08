@@ -1,0 +1,200 @@
+{
+  "source": "C:\\Users\\dotie\\Documents\\GitHub\\BBC\\annotations\\shots",
+  "description": "BBC annotations/shots converted to evaluator scene ranges; each shot row is treated as one scene so transitions are evaluated between adjacent shots.",
+  "key_format": "bbc_XX video stem",
+  "videos": 11,
+  "shots": 4855,
+  "transitions": 4844,
+  "cuts": 4705,
+  "gaps_or_graduals": 136,
+  "overlaps_or_shared_boundary_frames": 3,
+  "episodes": [
+    {
+      "key": "bbc_01",
+      "annotation": "C:\\Users\\dotie\\Documents\\GitHub\\BBC\\annotations\\shots\\01_From_Pole_to_Pole.txt",
+      "shots": 445,
+      "transitions": 444,
+      "cuts": 433,
+      "gaps_or_graduals": 11,
+      "overlaps_or_shared_boundary_frames": 0,
+      "first_shot": [
+        0,
+        632
+      ],
+      "last_shot": [
+        72350,
+        73854
+      ]
+    },
+    {
+      "key": "bbc_02",
+      "annotation": "C:\\Users\\dotie\\Documents\\GitHub\\BBC\\annotations\\shots\\02_Mountains.txt",
+      "shots": 383,
+      "transitions": 382,
+      "cuts": 364,
+      "gaps_or_graduals": 18,
+      "overlaps_or_shared_boundary_frames": 0,
+      "first_shot": [
+        0,
+        649
+      ],
+      "last_shot": [
+        70590,
+        72094
+      ]
+    },
+    {
+      "key": "bbc_03",
+      "annotation": "C:\\Users\\dotie\\Documents\\GitHub\\BBC\\annotations\\shots\\03_Ice Worlds.txt",
+      "shots": 421,
+      "transitions": 420,
+      "cuts": 410,
+      "gaps_or_graduals": 10,
+      "overlaps_or_shared_boundary_frames": 0,
+      "first_shot": [
+        0,
+        637
+      ],
+      "last_shot": [
+        72357,
+        73924
+      ]
+    },
+    {
+      "key": "bbc_04",
+      "annotation": "C:\\Users\\dotie\\Documents\\GitHub\\BBC\\annotations\\shots\\04_Great Plains.txt",
+      "shots": 472,
+      "transitions": 471,
+      "cuts": 465,
+      "gaps_or_graduals": 6,
+      "overlaps_or_shared_boundary_frames": 0,
+      "first_shot": [
+        0,
+        649
+      ],
+      "last_shot": [
+        72080,
+        73544
+      ]
+    },
+    {
+      "key": "bbc_05",
+      "annotation": "C:\\Users\\dotie\\Documents\\GitHub\\BBC\\annotations\\shots\\05_Jungles.txt",
+      "shots": 460,
+      "transitions": 459,
+      "cuts": 456,
+      "gaps_or_graduals": 3,
+      "overlaps_or_shared_boundary_frames": 0,
+      "first_shot": [
+        0,
+        649
+      ],
+      "last_shot": [
+        72258,
+        73849
+      ]
+    },
+    {
+      "key": "bbc_06",
+      "annotation": "C:\\Users\\dotie\\Documents\\GitHub\\BBC\\annotations\\shots\\06_Seasonal_Forests.txt",
+      "shots": 526,
+      "transitions": 525,
+      "cuts": 516,
+      "gaps_or_graduals": 9,
+      "overlaps_or_shared_boundary_frames": 0,
+      "first_shot": [
+        0,
+        649
+      ],
+      "last_shot": [
+        72405,
+        73984
+      ]
+    },
+    {
+      "key": "bbc_07",
+      "annotation": "C:\\Users\\dotie\\Documents\\GitHub\\BBC\\annotations\\shots\\07_Fresh_Water.txt",
+      "shots": 531,
+      "transitions": 530,
+      "cuts": 523,
+      "gaps_or_graduals": 7,
+      "overlaps_or_shared_boundary_frames": 0,
+      "first_shot": [
+        0,
+        649
+      ],
+      "last_shot": [
+        72568,
+        73904
+      ]
+    },
+    {
+      "key": "bbc_08",
+      "annotation": "C:\\Users\\dotie\\Documents\\GitHub\\BBC\\annotations\\shots\\08_Ocean_Deep.txt",
+      "shots": 410,
+      "transitions": 409,
+      "cuts": 399,
+      "gaps_or_graduals": 10,
+      "overlaps_or_shared_boundary_frames": 0,
+      "first_shot": [
+        0,
+        649
+      ],
+      "last_shot": [
+        72275,
+        73849
+      ]
+    },
+    {
+      "key": "bbc_09",
+      "annotation": "C:\\Users\\dotie\\Documents\\GitHub\\BBC\\annotations\\shots\\09_Shallow_Seas.txt",
+      "shots": 366,
+      "transitions": 365,
+      "cuts": 354,
+      "gaps_or_graduals": 11,
+      "overlaps_or_shared_boundary_frames": 0,
+      "first_shot": [
+        0,
+        649
+      ],
+      "last_shot": [
+        72425,
+        73819
+      ]
+    },
+    {
+      "key": "bbc_10",
+      "annotation": "C:\\Users\\dotie\\Documents\\GitHub\\BBC\\annotations\\shots\\10_Caves.txt",
+      "shots": 374,
+      "transitions": 373,
+      "cuts": 341,
+      "gaps_or_graduals": 30,
+      "overlaps_or_shared_boundary_frames": 2,
+      "first_shot": [
+        0,
+        634
+      ],
+      "last_shot": [
+        71850,
+        73354
+      ]
+    },
+    {
+      "key": "bbc_11",
+      "annotation": "C:\\Users\\dotie\\Documents\\GitHub\\BBC\\annotations\\shots\\11_Deserts.txt",
+      "shots": 467,
+      "transitions": 466,
+      "cuts": 444,
+      "gaps_or_graduals": 21,
+      "overlaps_or_shared_boundary_frames": 1,
+      "first_shot": [
+        0,
+        649
+      ],
+      "last_shot": [
+        71962,
+        73466
+      ]
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "comparison_models": [
+    {
+      "id": "autoshot_reported",
+      "name": "AutoShot theo báo cáo",
+      "source_kind": "literature",
+      "source": "AutoShot CVPRW 2023",
+      "metrics": {
+        "shot": 0.841,
+        "bbc": 0.971,
+        "clipshots": 0.787
+      }
+    },
+    {
+      "id": "autoshot_reproduced_legacy",
+      "name": "AutoShot tự chạy lại",
+      "source_kind": "legacy_result",
+      "source": "AutoShots_Report working tree, 2026-06-06",
+      "metrics": {
+        "shot": 0.8405,
+        "bbc": 0.9554,
+        "clipshots": 0.7753
+      }
+    },
+    {
+      "id": "transnetv2_reported",
+      "name": "TransNetV2",
+      "source_kind": "literature",
+      "source": "AutoShot CVPRW 2023 comparison table",
+      "metrics": {
+        "shot": 0.7993,
+        "bbc": 0.962,
+        "clipshots": 0.776
+      }
+    },
+    {
+      "id": "transnetv2_reproduced",
+      "name": "TransNetV2 tự chạy lại",
+      "source_kind": "legacy_result",
+      "source": "AutoShots_Report working tree, 2026-06-06",
+      "metrics": {
+        "shot": null,
+        "bbc": 0.9593,
+        "clipshots": 0.7454
+      }
+    },
+    {
+      "id": "autoshot_v1_gaussian",
+      "name": "AutoShotV1",
+      "source_kind": "legacy_result",
+      "source": "AutoShots_Report working tree, 2026-06-06",
+      "metrics": {
+        "shot": 0.848,
+        "bbc": 0.951,
+        "clipshots": 0.7987
+      }
+    }
+  ]
+}

@@ -1,0 +1,474 @@
+{
+  "seed": 42,
+  "k_folds": 5,
+  "results": [
+    {
+      "model": "A0_autoshot_baseline",
+      "dataset": "shot",
+      "n_videos": 200,
+      "k_folds": 5,
+      "cv_deploy": {
+        "f1": 0.8442991418062935,
+        "precision": 0.8687973086627419,
+        "recall": 0.8211446740858506,
+        "tp": 2066,
+        "fp": 312,
+        "fn": 450
+      },
+      "cv_chosen_params": [
+        {
+          "temperature": 0.4,
+          "sigma": 2.0,
+          "threshold": 0.02,
+          "fold_f1": 0.8135593220338982
+        },
+        {
+          "temperature": 0.4,
+          "sigma": 2.0,
+          "threshold": 0.02,
+          "fold_f1": 0.8741496598639457
+        },
+        {
+          "temperature": 0.661785970550883,
+          "sigma": 2.0,
+          "threshold": 0.05,
+          "fold_f1": 0.8487486398258977
+        },
+        {
+          "temperature": 0.4,
+          "sigma": 2.0,
+          "threshold": 0.02,
+          "fold_f1": 0.8519855595667871
+        },
+        {
+          "temperature": 0.661785970550883,
+          "sigma": 1.0,
+          "threshold": 0.1,
+          "fold_f1": 0.8281250000000001
+        }
+      ],
+      "test_ceiling": {
+        "f1": 0.8475409836065573,
+        "temperature": 0.4,
+        "sigma": 2.0,
+        "threshold": 0.02
+      }
+    },
+    {
+      "model": "A0_autoshot_baseline",
+      "dataset": "clipshots",
+      "n_videos": 500,
+      "k_folds": 5,
+      "cv_deploy": {
+        "f1": 0.7880711499041196,
+        "precision": 0.7529694212787466,
+        "recall": 0.8266056318490775,
+        "tp": 5959,
+        "fp": 1955,
+        "fn": 1250
+      },
+      "cv_chosen_params": [
+        {
+          "temperature": 1.0,
+          "sigma": 2.0,
+          "threshold": 0.15,
+          "fold_f1": 0.8042477876106194
+        },
+        {
+          "temperature": 1.0,
+          "sigma": 2.0,
+          "threshold": 0.15,
+          "fold_f1": 0.7378395451674037
+        },
+        {
+          "temperature": 1.0,
+          "sigma": 2.0,
+          "threshold": 0.15,
+          "fold_f1": 0.812539184952978
+        },
+        {
+          "temperature": 1.0,
+          "sigma": 2.0,
+          "threshold": 0.15,
+          "fold_f1": 0.7960893854748603
+        },
+        {
+          "temperature": 1.0,
+          "sigma": 2.0,
+          "threshold": 0.18,
+          "fold_f1": 0.7920727745289149
+        }
+      ],
+      "test_ceiling": {
+        "f1": 0.789646133682831,
+        "temperature": 1.0,
+        "sigma": 2.0,
+        "threshold": 0.15
+      }
+    },
+    {
+      "model": "A0_autoshot_baseline",
+      "dataset": "bbc",
+      "n_videos": 11,
+      "k_folds": 5,
+      "cv_deploy": {
+        "f1": 0.9538040618751974,
+        "precision": 0.9727409315303713,
+        "recall": 0.935590421139554,
+        "tp": 4532,
+        "fp": 127,
+        "fn": 312
+      },
+      "cv_chosen_params": [
+        {
+          "temperature": 0.4,
+          "sigma": 2.0,
+          "threshold": 0.02,
+          "fold_f1": 0.9260819609345078
+        },
+        {
+          "temperature": 0.5,
+          "sigma": 1.0,
+          "threshold": 0.02,
+          "fold_f1": 0.9697933227344991
+        },
+        {
+          "temperature": 0.5,
+          "sigma": 1.0,
+          "threshold": 0.02,
+          "fold_f1": 0.9670212765957447
+        },
+        {
+          "temperature": 0.4,
+          "sigma": 1.0,
+          "threshold": 0.02,
+          "fold_f1": 0.9519172245891662
+        },
+        {
+          "temperature": 0.4,
+          "sigma": 1.0,
+          "threshold": 0.02,
+          "fold_f1": 0.9676113360323886
+        }
+      ],
+      "test_ceiling": {
+        "f1": 0.9561375828337014,
+        "temperature": 0.4,
+        "sigma": 1.0,
+        "threshold": 0.02
+      }
+    },
+    {
+      "model": "A1_phase2_control",
+      "dataset": "shot",
+      "n_videos": 200,
+      "k_folds": 5,
+      "cv_deploy": {
+        "f1": 0.8540497193263833,
+        "precision": 0.8616504854368932,
+        "recall": 0.8465818759936407,
+        "tp": 2130,
+        "fp": 342,
+        "fn": 386
+      },
+      "cv_chosen_params": [
+        {
+          "temperature": 0.661785970550883,
+          "sigma": 2.0,
+          "threshold": 0.1,
+          "fold_f1": 0.8260869565217391
+        },
+        {
+          "temperature": 0.661785970550883,
+          "sigma": 2.0,
+          "threshold": 0.1,
+          "fold_f1": 0.8744734625105306
+        },
+        {
+          "temperature": 0.661785970550883,
+          "sigma": 2.0,
+          "threshold": 0.1,
+          "fold_f1": 0.872454448017149
+        },
+        {
+          "temperature": 0.661785970550883,
+          "sigma": 2.0,
+          "threshold": 0.1,
+          "fold_f1": 0.8574766355140188
+        },
+        {
+          "temperature": 0.661785970550883,
+          "sigma": 2.0,
+          "threshold": 0.1,
+          "fold_f1": 0.8374760994263862
+        }
+      ],
+      "test_ceiling": {
+        "f1": 0.8540497193263833,
+        "temperature": 0.661785970550883,
+        "sigma": 2.0,
+        "threshold": 0.1
+      }
+    },
+    {
+      "model": "A1_phase2_control",
+      "dataset": "clipshots",
+      "n_videos": 500,
+      "k_folds": 5,
+      "cv_deploy": {
+        "f1": 0.7575209812782441,
+        "precision": 0.7084893128849172,
+        "recall": 0.8138438063531697,
+        "tp": 5867,
+        "fp": 2414,
+        "fn": 1342
+      },
+      "cv_chosen_params": [
+        {
+          "temperature": 1.0,
+          "sigma": 2.0,
+          "threshold": 0.18,
+          "fold_f1": 0.7720994475138121
+        },
+        {
+          "temperature": 1.0,
+          "sigma": 1.0,
+          "threshold": 0.3,
+          "fold_f1": 0.6877623506619309
+        },
+        {
+          "temperature": 1.0,
+          "sigma": 2.0,
+          "threshold": 0.18,
+          "fold_f1": 0.7851991219818126
+        },
+        {
+          "temperature": 1.0,
+          "sigma": 2.0,
+          "threshold": 0.18,
+          "fold_f1": 0.7523966942148761
+        },
+        {
+          "temperature": 1.0,
+          "sigma": 2.0,
+          "threshold": 0.18,
+          "fold_f1": 0.7883033810539142
+        }
+      ],
+      "test_ceiling": {
+        "f1": 0.7598690544964376,
+        "temperature": 1.0,
+        "sigma": 2.0,
+        "threshold": 0.18
+      }
+    },
+    {
+      "model": "A1_phase2_control",
+      "dataset": "bbc",
+      "n_videos": 11,
+      "k_folds": 5,
+      "cv_deploy": {
+        "f1": 0.9630559916274202,
+        "precision": 0.976650392697941,
+        "recall": 0.9498348472336912,
+        "tp": 4601,
+        "fp": 110,
+        "fn": 243
+      },
+      "cv_chosen_params": [
+        {
+          "temperature": 0.4,
+          "sigma": 2.0,
+          "threshold": 0.05,
+          "fold_f1": 0.9446522064323111
+        },
+        {
+          "temperature": 0.4,
+          "sigma": 2.0,
+          "threshold": 0.05,
+          "fold_f1": 0.9759743726641752
+        },
+        {
+          "temperature": 0.4,
+          "sigma": 2.0,
+          "threshold": 0.05,
+          "fold_f1": 0.9744952178533475
+        },
+        {
+          "temperature": 0.4,
+          "sigma": 2.0,
+          "threshold": 0.05,
+          "fold_f1": 0.9592705167173252
+        },
+        {
+          "temperature": 0.4,
+          "sigma": 2.0,
+          "threshold": 0.05,
+          "fold_f1": 0.9696151249155975
+        }
+      ],
+      "test_ceiling": {
+        "f1": 0.9630559916274202,
+        "temperature": 0.4,
+        "sigma": 2.0,
+        "threshold": 0.05
+      }
+    },
+    {
+      "model": "B5_phase2_full",
+      "dataset": "shot",
+      "n_videos": 200,
+      "k_folds": 5,
+      "cv_deploy": {
+        "f1": 0.853896751046442,
+        "precision": 0.8564574170331867,
+        "recall": 0.8513513513513513,
+        "tp": 2142,
+        "fp": 359,
+        "fn": 374
+      },
+      "cv_chosen_params": [
+        {
+          "temperature": 0.4,
+          "sigma": 2.0,
+          "threshold": 0.12,
+          "fold_f1": 0.8277310924369747
+        },
+        {
+          "temperature": 0.4,
+          "sigma": 2.0,
+          "threshold": 0.1,
+          "fold_f1": 0.8705096073517126
+        },
+        {
+          "temperature": 0.4,
+          "sigma": 2.0,
+          "threshold": 0.1,
+          "fold_f1": 0.8771186440677967
+        },
+        {
+          "temperature": 0.4,
+          "sigma": 2.0,
+          "threshold": 0.1,
+          "fold_f1": 0.8528735632183908
+        },
+        {
+          "temperature": 0.4,
+          "sigma": 2.0,
+          "threshold": 0.1,
+          "fold_f1": 0.8387096774193549
+        }
+      ],
+      "test_ceiling": {
+        "f1": 0.8549890894663758,
+        "temperature": 0.4,
+        "sigma": 2.0,
+        "threshold": 0.1
+      }
+    },
+    {
+      "model": "B5_phase2_full",
+      "dataset": "clipshots",
+      "n_videos": 500,
+      "k_folds": 5,
+      "cv_deploy": {
+        "f1": 0.7554533508541393,
+        "precision": 0.7176382474098115,
+        "recall": 0.7974753779997226,
+        "tp": 5749,
+        "fp": 2262,
+        "fn": 1460
+      },
+      "cv_chosen_params": [
+        {
+          "temperature": 0.4,
+          "sigma": 2.0,
+          "threshold": 0.18,
+          "fold_f1": 0.7744525547445257
+        },
+        {
+          "temperature": 0.4,
+          "sigma": 2.0,
+          "threshold": 0.18,
+          "fold_f1": 0.6952224052718287
+        },
+        {
+          "temperature": 0.4,
+          "sigma": 2.0,
+          "threshold": 0.18,
+          "fold_f1": 0.77632
+        },
+        {
+          "temperature": 0.4,
+          "sigma": 2.0,
+          "threshold": 0.15,
+          "fold_f1": 0.7483745123537062
+        },
+        {
+          "temperature": 0.5,
+          "sigma": 2.0,
+          "threshold": 0.18,
+          "fold_f1": 0.782367447595561
+        }
+      ],
+      "test_ceiling": {
+        "f1": 0.7607320683622661,
+        "temperature": 0.4,
+        "sigma": 2.0,
+        "threshold": 0.18
+      }
+    },
+    {
+      "model": "B5_phase2_full",
+      "dataset": "bbc",
+      "n_videos": 11,
+      "k_folds": 5,
+      "cv_deploy": {
+        "f1": 0.9584033613445377,
+        "precision": 0.9756201881950385,
+        "recall": 0.9417836498761354,
+        "tp": 4562,
+        "fp": 114,
+        "fn": 282
+      },
+      "cv_chosen_params": [
+        {
+          "temperature": 0.4,
+          "sigma": 0.0,
+          "threshold": 0.4,
+          "fold_f1": 0.9372637944066515
+        },
+        {
+          "temperature": 0.661785970550883,
+          "sigma": 0.0,
+          "threshold": 0.4,
+          "fold_f1": 0.9695675387079551
+        },
+        {
+          "temperature": 0.661785970550883,
+          "sigma": 0.0,
+          "threshold": 0.4,
+          "fold_f1": 0.9733475479744137
+        },
+        {
+          "temperature": 0.661785970550883,
+          "sigma": 0.0,
+          "threshold": 0.4,
+          "fold_f1": 0.9561510353227771
+        },
+        {
+          "temperature": 0.4,
+          "sigma": 0.0,
+          "threshold": 0.3,
+          "fold_f1": 0.9656102494942684
+        }
+      ],
+      "test_ceiling": {
+        "f1": 0.9602767005554973,
+        "temperature": 0.661785970550883,
+        "sigma": 0.0,
+        "threshold": 0.4
+      }
+    }
+  ]
+}

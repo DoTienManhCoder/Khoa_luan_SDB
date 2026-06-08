@@ -1,0 +1,136 @@
+%% bare_jrnl.tex
+%% Adapted from the IEEEtran journal template for the AutoShotV2 paper.
+
+\documentclass[journal]{IEEEtran}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{cite}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{url}
+\usetikzlibrary{arrows.meta,positioning,fit,calc}
+
+\graphicspath{{images/}}
+\DeclareGraphicsExtensions{.pdf,.png,.jpg,.jpeg}
+
+\interdisplaylinepenalty=2500
+
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
+\newcolumntype{Z}{>{\raggedright\arraybackslash}X}
+
+\hyphenation{Auto-Shot Trans-Net Clip-Shots bound-ary}
+
+\input{generated/experiment_macros.tex}
+\input{generated/experiment_tables.tex}
+
+\begin{document}
+
+\title{AutoShotV2: Calibrated Classification and Post-Processing for Short-Video Shot Boundary Detection}
+
+\author{Senh~Manh~Tang, Tien~Manh~Do, and Thai~Son~Tran}
+
+\markboth{IEEE Journal Paper Draft,~June~2026}%
+{Tang \MakeLowercase{\textit{et al.}}: AutoShotV2 for Short-Video Shot Boundary Detection}
+
+\maketitle
+
+\input{sections/abstract.tex}
+
+\begin{IEEEkeywords}
+Shot boundary detection, short video, AutoShot, TransNetV2, Focal Loss, temperature scaling, Gaussian smoothing, video understanding.
+\end{IEEEkeywords}
+
+\IEEEpeerreviewmaketitle
+
+\input{sections/1_introduction.tex}
+\input{sections/2_related_work.tex}
+\input{sections/3_method.tex}
+\input{sections/4_experiments.tex}
+\input{sections/6_conclusion.tex}
+\input{sections/7_acknowledgment.tex}
+\ifCLASSOPTIONcaptionsoff
+  \newpage
+\fi
+
+\begin{thebibliography}{99}
+
+\bibitem{seridi2020survey}
+H. Seridi, M. Kurulay, Z. Kouahla, B. Farou, M. N. Kouahla, M. A. Ferrag, and M. A. Boudia, ``Shot boundary detection: Fundamental concepts and survey,'' in \emph{CEUR Workshop Proceedings}, vol. 2589, 2020.
+
+\bibitem{kar2024review}
+T. Kar, P. Kanungo, S. N. Mohanty, S. Groppe, and J. Groppe, ``Video shot-boundary detection: Issues, challenges and solutions,'' \emph{Artificial Intelligence Review}, vol. 57, no. 104, 2024.
+
+\bibitem{abdulhussain2018review}
+S. H. Abdulhussain, ``Methods and challenges in shot boundary detection,'' \emph{Entropy}, vol. 20, no. 4, p. 214, 2018.
+
+\bibitem{zhu2023autoshot}
+W. Zhu, Y. Yu, W. Huang, J. Huang, W. Feng, X. Wang, X. Yang, C. Hu, C. Liu, B. Fan, and T. He, ``AutoShot: A short video dataset and state-of-the-art shot boundary detection,'' in \emph{Proc. IEEE/CVF CVPR Workshops}, 2023.
+
+\bibitem{soucek2020transnetv2}
+T. Soucek and J. Moravec, ``TransNet V2: An effective deep network architecture for fast shot transition detection,'' \emph{arXiv preprint arXiv:2008.04838}, 2020.
+
+\bibitem{soucek2019transnet}
+T. Soucek, J. Moravec, and J. Lokoc, ``TransNet: A deep network for fast detection of common shot transitions,'' \emph{arXiv preprint arXiv:1906.03363}, 2019.
+
+\bibitem{baraldi2015rai}
+L. Baraldi, C. Grana, and R. Cucchiara, ``Shot and scene detection via hierarchical clustering for re-using broadcast video,'' in \emph{Computer Analysis of Images and Patterns}, 2015, pp. 801--811.
+
+\bibitem{tang2018clipshots}
+S. Tang, L. Feng, Z. Kuang, Y. Chen, and W. Zhang, ``Fast video shot transition localization with deep structured models,'' \emph{arXiv preprint arXiv:1808.04234}, 2018.
+
+\bibitem{hassanien2017largescale}
+A. Hassanien, M. Elgharib, A. Selim, S.-H. Bae, M. Hefeeda, and W. Matusik, ``Large-scale, fast and accurate shot boundary detection through spatio-temporal convolutional neural networks,'' \emph{arXiv preprint arXiv:1705.03281}, 2017.
+
+\bibitem{elsken2019nas}
+T. Elsken, J. H. Metzen, and F. Hutter, ``Neural architecture search: A survey,'' \emph{Journal of Machine Learning Research}, vol. 20, no. 55, pp. 1--21, 2019.
+
+\bibitem{lin2017focal}
+T.-Y. Lin, P. Goyal, R. Girshick, K. He, and P. Dollar, ``Focal loss for dense object detection,'' in \emph{Proc. IEEE International Conference on Computer Vision}, 2017, pp. 2980--2988.
+
+\bibitem{guo2017calibration}
+C. Guo, G. Pleiss, Y. Sun, and K. Q. Weinberger, ``On calibration of modern neural networks,'' in \emph{Proc. International Conference on Machine Learning}, 2017, pp. 1321--1330.
+
+\bibitem{loshchilov2017sgdr}
+I. Loshchilov and F. Hutter, ``SGDR: Stochastic gradient descent with warm restarts,'' in \emph{Proc. International Conference on Learning Representations}, 2017.
+
+\bibitem{vietnamnet2023shortform}
+V. Anh, ``Short-form video trend harming youth,'' \emph{VietnamNet Global}, May 2023.
+
+\bibitem{white2023_nas1000}
+C. White, M. Safari, R. Sukthanker, B. Ru, T. Elsken, A. Zela, D. Dey, and F. Hutter, ``Neural architecture search: Insights from 1000 papers,'' \emph{arXiv preprint arXiv:2301.08727}, 2023.
+
+\bibitem{ren2020_nas_survey}
+P. Ren, Y. Xiao, X. Chang, P.-Y. Huang, Z. Li, X. Chen, and X. Wang, ``A comprehensive survey of neural architecture search: Challenges and solutions,'' \emph{arXiv preprint arXiv:2006.02903}, 2020.
+
+\bibitem{Muller2019LabelSmoothing}
+R. M{\"u}ller, S. Kornblith, and G. E. Hinton, ``When does label smoothing help?'' in \emph{Proc. Advances in Neural Information Processing Systems}, 2019, pp. 4694--4703.
+
+\bibitem{esteve2023shot}
+A. Esteve et al., ``Shot boundary detection with 3D depthwise convolutions and visual attention,'' \emph{Sensors}, vol. 23, no. 12, p. 5620, 2023.
+
+\bibitem{hinton2015distilling}
+G. Hinton, O. Vinyals, and J. Dean, ``Distilling the knowledge in a neural network,'' \emph{arXiv preprint arXiv:1503.02531}, 2015.
+
+\bibitem{vaswani2017attention}
+A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N. Gomez, L. Kaiser, and I. Polosukhin, ``Attention is all you need,'' in \emph{Proc. Advances in Neural Information Processing Systems}, 2017, pp. 5998--6008.
+
+\bibitem{tran2015c3d}
+D. Tran, L. Bourdev, R. Fergus, L. Torresani, and M. Paluri, ``Learning spatiotemporal features with 3D convolutional networks,'' in \emph{Proc. IEEE International Conference on Computer Vision}, 2015, pp. 4489--4497.
+
+\bibitem{guo2020spos}
+Z. Guo, X. Zhang, H. Mu, W. Heng, Z. Liu, Y. Wei, and J. Sun, ``Single path one-shot neural architecture search with uniform sampling,'' in \emph{Proc. European Conference on Computer Vision}, 2020, pp. 544--560.
+
+\bibitem{liu2019darts}
+H. Liu, K. Simonyan, and Y. Yiming, ``DARTS: Differentiable architecture search,'' in \emph{Proc. International Conference on Learning Representations}, 2019.
+
+\end{thebibliography}
+
+\end{document}

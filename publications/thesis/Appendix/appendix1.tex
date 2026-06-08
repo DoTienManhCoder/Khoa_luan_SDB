@@ -1,0 +1,58 @@
+\appendix
+
+\chapter{Ký hiệu toán học và quy ước đánh giá}
+
+Phụ lục này tổng hợp các ký hiệu chính xuất hiện trong khóa luận và nhắc lại các quy ước đánh giá được sử dụng xuyên suốt phần thực nghiệm.
+
+\section{Ký hiệu sử dụng trong khóa luận}
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{L{2.4cm}L{5.0cm}L{6.0cm}}
+\toprule
+\textbf{Ký hiệu} & \textbf{Tên gọi} & \textbf{Ý nghĩa} \\
+\midrule
+$V=\{f_1,\dots,f_n\}$ & Chuỗi khung hình đầu vào & Video gồm $n$ khung hình theo thứ tự thời gian. \\
+$f_i$ & Khung hình thứ $i$ & Phần tử cơ bản của video đầu vào. \\
+$B=\{b_1,\dots,b_m\}$ & Tập ranh giới cảnh quay & Tập hợp các vị trí bắt đầu shot mới trong video. \\
+$b_j$ & Ranh giới thứ $j$ & Một mốc thời gian biểu thị sự chuyển từ shot hiện tại sang shot kế tiếp. \\
+$\hat{y}_{single}$ & Dự đoán single-frame & Xác suất ranh giới tại khung hình trung tâm. \\
+$\hat{y}_{all}$ & Dự đoán all-frame / many-hot & Xác suất trên vùng lân cận quanh ranh giới, dùng để hỗ trợ huấn luyện. \\
+$p[t]$ & Xác suất tại thời điểm $t$ & Giá trị đầu ra của mô hình trước hoặc sau hậu xử lý. \\
+$\theta$ & Ngưỡng quyết định & Ngưỡng chuyển xác suất sang quyết định có ranh giới hay không (ngưỡng $> \theta \Rightarrow$ có ranh giới). \\
+$T^*$ & Nhiệt độ tối ưu & Hệ số hiệu chỉnh xác suất trong temperature scaling. \\
+$\sigma$ & Độ lệch chuẩn Gaussian & Tham số điều khiển mức làm mượt của Gaussian smoothing. \\
+$\gamma$ & Tham số tập trung & Tham số $\gamma$ của Focal Loss, điều khiển mức ưu tiên mẫu khó. \\
+$\alpha$ & Tham số cân bằng & Tham số $\alpha$ của Focal Loss, điều chỉnh tỉ lệ giữa lớp dương và âm. \\
+$\beta$ & Hệ số \textit{momentum} EMA & Hệ số trung bình động mũ trên trọng số mô hình. \\
+$\eta_t$ & Tốc độ học tại bước $t$ & Tốc độ học theo lịch trình Cosine với khởi động dần. \\
+$\mathcal{A}$ & Không gian tìm kiếm NAS & Tập hợp toàn bộ kiến trúc ứng viên trong bài toán NAS. \\
+$\mathcal{L}$ & Hàm mất mát tổng & Đại lượng tối ưu trong quá trình huấn luyện mô hình. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Quy ước đánh giá}
+
+Trong bài toán phát hiện ranh giới cảnh quay, dữ liệu thường mất cân bằng mạnh do số khung hình nền lớn hơn rất nhiều số khung hình thuộc ranh giới. Vì vậy, khóa luận không dùng Độ chính xác làm chỉ số chính mà ưu tiên bộ ba Precision, Recall và F1-score.
+
+\begin{itemize}
+    \item \textbf{True Positive (TP):} mô hình dự đoán đúng một ranh giới cảnh quay.
+    \item \textbf{False Positive (FP):} mô hình dự đoán có ranh giới nhưng thực tế không có.
+    \item \textbf{False Negative (FN):} mô hình bỏ sót một ranh giới có thật trong dữ liệu gán nhãn.
+\end{itemize}
+
+Các chỉ số được tính theo các công thức:
+\begin{equation}
+    Precision = \frac{TP}{TP + FP}
+\end{equation}
+\begin{equation}
+    Recall = \frac{TP}{TP + FN}
+\end{equation}
+\begin{equation}
+    F1 = 2 \times \frac{Precision \times Recall}{Precision + Recall}
+\end{equation}
+
+Trong các thí nghiệm của khóa luận, F1-score được dùng làm tiêu chí so sánh chính giữa các mô hình vì đây là chỉ số phản ánh tốt nhất sự cân bằng giữa khả năng phát hiện đúng và khả năng hạn chế báo động giả.

@@ -1,0 +1,116 @@
+{
+  "gt_path": "C:\\Users\\dotie\\Documents\\GitHub\\archive2\\autoshotv2\\gt_scenes_dict_baseline_v2.pickle",
+  "logits_path": "C:\\Users\\dotie\\Documents\\GitHub\\archive2\\autoshotv2\\eval_cache_shot_clipshots\\shot_test_logits.pkl",
+  "checkpoint_path": "C:\\Users\\dotie\\Documents\\GitHub\\archive2\\autoshotv2\\ckpt_phase2_shot_clipshots_best.pth",
+  "videos_evaluated": 200,
+  "gt_videos": 200,
+  "missing_gt_keys": [],
+  "cache_config": {
+    "state_fingerprint": "b27d16c1988546a37977aa10581f4c3921730b79d98820ceb4bc3f3273eb1331",
+    "keys_hash": "219699bc35fd9fa8103a9e802ab46f3dfd843bc0488968e973aa068fbb484795",
+    "split": "shot_test"
+  },
+  "postprocess": {
+    "temperature": 0.38780461844336944,
+    "sigma": 2.0,
+    "deploy_threshold": 0.1
+  },
+  "best_sweep": {
+    "threshold": 0.1,
+    "f1": 0.8545273631840797,
+    "precision": 0.8557194101235552,
+    "recall": 0.8533386327503975,
+    "tp": 2147,
+    "fp": 362,
+    "fn": 369
+  },
+  "deploy": {
+    "threshold": 0.1,
+    "f1": 0.8545273631840797,
+    "precision": 0.8557194101235552,
+    "recall": 0.8533386327503975,
+    "tp": 2147,
+    "fp": 362,
+    "fn": 369
+  },
+  "best_sweep_check_from_utils": {
+    "threshold": 0.1,
+    "f1": 0.8545273631840797,
+    "precision": 0.8557194101235552,
+    "recall": 0.8533386327503975
+  },
+  "top_thresholds": [
+    {
+      "threshold": 0.1,
+      "f1": 0.8545273631840797,
+      "precision": 0.8557194101235552,
+      "recall": 0.8533386327503975,
+      "tp": 2147,
+      "fp": 362,
+      "fn": 369
+    },
+    {
+      "threshold": 0.06,
+      "f1": 0.8519160408241863,
+      "precision": 0.826298094882331,
+      "recall": 0.8791732909379968,
+      "tp": 2212,
+      "fp": 465,
+      "fn": 304
+    },
+    {
+      "threshold": 0.15,
+      "f1": 0.8342066652693355,
+      "precision": 0.8824833702882483,
+      "recall": 0.7909379968203497,
+      "tp": 1990,
+      "fp": 265,
+      "fn": 526
+    },
+    {
+      "threshold": 0.02,
+      "f1": 0.8239166209544706,
+      "precision": 0.7629529292245174,
+      "recall": 0.8954689984101749,
+      "tp": 2253,
+      "fp": 700,
+      "fn": 263
+    },
+    {
+      "threshold": 0.2,
+      "f1": 0.17889087656529518,
+      "precision": 0.8960573476702509,
+      "recall": 0.09936406995230525,
+      "tp": 250,
+      "fp": 29,
+      "fn": 2266
+    },
+    {
+      "threshold": 0.21,
+      "f1": 0.09193669932177845,
+      "precision": 0.8840579710144928,
+      "recall": 0.04848966613672496,
+      "tp": 122,
+      "fp": 16,
+      "fn": 2394
+    },
+    {
+      "threshold": 0.22,
+      "f1": 0.0665646518745218,
+      "precision": 0.8877551020408163,
+      "recall": 0.03457869634340222,
+      "tp": 87,
+      "fp": 11,
+      "fn": 2429
+    },
+    {
+      "threshold": 0.23,
+      "f1": 0.0456833139759969,
+      "precision": 0.8805970149253731,
+      "recall": 0.02344992050874404,
+      "tp": 59,
+      "fp": 8,
+      "fn": 2457
+    }
+  ]
+}

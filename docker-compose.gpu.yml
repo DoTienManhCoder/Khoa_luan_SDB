@@ -1,0 +1,13 @@
+services:
+  backend:
+    build:
+      dockerfile: apps/web/backend/Dockerfile.gpu
+    environment:
+      AUTOSHOT_DEVICE: cuda
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

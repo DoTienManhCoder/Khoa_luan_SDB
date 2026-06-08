@@ -1,0 +1,8 @@
+{
+  "source": "C:\\Users\\dotie\\Documents\\GitHub\\clipshots\\annotations\\test.json",
+  "videos": 500,
+  "transitions": 7209,
+  "cut_transitions": 4903,
+  "gradual_transitions": 2306,
+  "key_format": "video stem without extension"
+}

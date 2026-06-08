@@ -1,0 +1,81 @@
+__pycache__/
+.pytest_cache/
+*.py[cod]
+
+# Packaging build artifacts (pip install -e .)
+*.egg-info/
+build/
+.eggs/
+
+# Local environments
+.env
+.venv/
+venv/
+
+# Training and inference artifacts
+*.pth
+*.pt
+*.pkl
+*.pickle
+*.partial.pkl
+*.pid
+*.log
+
+*_checkpoints/
+*_cache/
+*.parts/
+logs/
+eval_cache_*/
+artifacts/experiments/ablation_*/
+artifacts/experiments/published_sweeps/
+smoke_*/
+
+# Datasets (provisioned separately, see docs/ARTIFACTS_MANIFEST.md and data/README.md)
+data/*
+!data/README.md
+
+# Generated visualization dumps (regenerable smoke output, not curated figures)
+reports/figures/bbc_smoke/
+_smoke_out/
+
+# Web runtime artifacts
+artifacts/models/*
+!artifacts/models/README.md
+apps/web/backend/storage/
+apps/web/frontend/node_modules/
+apps/web/frontend/dist/
+
+# Thesis build artifacts; canonical binaries live in publications/thesis/releases/
+publications/thesis/build/
+publications/thesis/**/*.aux
+publications/thesis/**/*.bbl
+publications/thesis/**/*.bcf
+publications/thesis/**/*.blg
+publications/thesis/**/*.fdb_latexmk
+publications/thesis/**/*.fls
+publications/thesis/**/*.lof
+publications/thesis/**/*.log
+publications/thesis/**/*.lot
+publications/thesis/**/*.out
+publications/thesis/**/*.run.xml
+publications/thesis/**/*.toc
+publications/thesis/**/*.synctex.gz
+
+# Paper build artifacts; canonical PDF lives in publications/paper/releases/
+publications/paper/build/
+publications/paper/**/*.aux
+publications/paper/**/*.bbl
+publications/paper/**/*.bcf
+publications/paper/**/*.blg
+publications/paper/**/*.fdb_latexmk
+publications/paper/**/*.fls
+publications/paper/**/*.lof
+publications/paper/**/*.log
+publications/paper/**/*.lot
+publications/paper/**/*.out
+publications/paper/**/*.run.xml
+publications/paper/**/*.toc
+publications/paper/**/*.synctex.gz
+
+# Notebook/runtime noise
+.ipynb_checkpoints/

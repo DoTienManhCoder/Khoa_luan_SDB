@@ -1,0 +1,141 @@
+\chapter{CƠ SỞ LÝ THUYẾT VÀ CÔNG TRÌNH LIÊN QUAN}
+\label{cong_trinh_lien_quan}
+\vspace{-1.5cm}
+\begin{quotation}
+\noindent
+\small\textit{
+Chương này trình bày nền tảng lý thuyết và các công trình liên quan cho bài toán phát hiện ranh giới cảnh quay (SBD), từ phương pháp cổ điển dựa trên đặc trưng thủ công, đến phương pháp học sâu hiện đại với CNN/3D ConvNet/Transformer, và gần đây nhất là hướng tìm kiếm kiến trúc mạng nơ-ron (NAS). Trên cơ sở đó, chương xác định các khoảng trống nghiên cứu làm nền cho phương pháp ở Chương~\ref{ch:phuong_phap_de_xuat}, thiết lập ở Chương~\ref{ch:bo_du_lieu_va_thuc_nghiem} và kết quả ở Chương~\ref{ch:ket_qua_thuc_nghiem}.
+}
+\end{quotation}
+\vspace{1em}
+
+\section{Tổng quan bài toán Shot Boundary Detection}
+\label{sec:sbd_overview}
+Các hướng nghiên cứu SBD có thể nhóm thành ba dòng chính, mỗi dòng có thế mạnh và giới hạn riêng (Hình~\ref{fig:deep_learning_methods}):
+\begin{itemize}
+    \item \textbf{Hướng cổ điển dựa trên đặc trưng thủ công.} Các phương pháp so sánh histogram màu, chênh lệch pixel hoặc biên cạnh có ưu điểm dễ triển khai và chi phí tính toán thấp. Tuy nhiên, chúng phụ thuộc mạnh vào ngưỡng thủ công, kém bền vững trước nhiễu ánh sáng/chuyển động và thường khó xử lý chuyển cảnh dần \cite{Abdulhussain2018_SBD_MethodsChallenges}.
+    \item \textbf{Hướng học sâu CNN/Transformer.} Các mô hình như DeepSBD \cite{hassanien2017largescale} và TransNetV2 \cite{soucek2020transnetv2} học đặc trưng không-thời gian từ dữ liệu, cải thiện đáng kể Precision/Recall trên nhiều bộ chuẩn. Tuy vậy, kiến trúc mạng xương sống được thiết kế thủ công vẫn có nguy cơ chưa tối ưu cho video ngắn có nhịp cắt cảnh dày đặc.
+    \item \textbf{Hướng NAS cho SBD.} Thay vì thiết kế thủ công, NAS \cite{elsken2018_nas_survey,ren2020_nas_survey,white2023_nas1000} tự động tìm kiến trúc tốt nhất trong một không gian ứng viên. AutoShot \cite{zhu2023autoshot} cho thấy hướng này có tiềm năng vượt các mô hình cơ sở mạnh trên SHOT, nhưng hiệu quả tổng quát hóa sang các miền dữ liệu khác vẫn còn là câu hỏi mở.
+\end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{images/deep_learning_methods.jpg}
+    \caption{Phổ các phương pháp học sâu được sử dụng trong phát hiện ranh giới cảnh quay.}
+    \label{fig:deep_learning_methods}
+\end{figure}
+\FloatBarrier
+
+Phần còn lại của chương đi sâu vào từng dòng phương pháp theo trình tự tiến hóa của lĩnh vực, kết thúc bằng bảng so sánh tổng quan và phân tích khoảng trống nghiên cứu.
+
+\section{Phương pháp cổ điển}
+\label{sec:classical_methods}
+Trước kỷ nguyên học sâu, các phương pháp SBD chủ yếu dựa trên đặc trưng thủ công và ngưỡng cố định. Khung xử lý điển hình của một thuật toán SBD cổ điển gồm ba bước: (i) trích xuất đặc trưng mức thấp từ mỗi khung hình, (ii) tính độ đo khoảng cách giữa các khung hình liên tiếp, và (iii) so ngưỡng để quyết định có ranh giới shot hay không \cite{ShotBoundaryDetection,Abdulhussain2018_SBD_MethodsChallenges}. Nhóm phương pháp này có ưu điểm là đơn giản, dễ triển khai và chi phí tính toán thấp; tuy nhiên độ bền vững trước nhiễu cũng như khả năng tổng quát hóa trên dữ liệu đa dạng còn nhiều hạn chế \cite{Kar2024_VideoSBD_IssuesChallengesSolutions}.
+
+\subsection{Biểu đồ tần suất và chênh lệch điểm ảnh}
+Phương pháp Sum of Absolute Differences (SAD)~\cite{ShotBoundaryDetection,Abdulhussain2018_SBD_MethodsChallenges} so sánh chênh lệch pixel giữa hai khung hình liên tiếp: $D_{\mathrm{pixel}} = \frac{1}{HW}\sum|f_{t-1}(x,y)-f_t(x,y)|$; đánh dấu ranh giới khi $D_{\mathrm{pixel}} > \theta$. Histogram màu cải thiện bằng cách so sánh phân phối màu ($\chi^2$ hoặc cosine distance), ít nhạy với chuyển động nhỏ hơn SAD. Cả hai phù hợp với chuyển cảnh đột ngột nhưng kém hiệu quả với chuyển cảnh dần và dễ bị nhiễu bởi thay đổi ánh sáng \cite{Abdulhussain2018_SBD_MethodsChallenges}.
+
+\subsection{Dựa trên biên cạnh và miền nén}
+Một nhánh cổ điển khác sử dụng đặc trưng biên cạnh để đo sự thay đổi cấu trúc giữa các khung hình. Tỉ lệ \textit{Edge Change Ratio} (ECR) đếm tỷ lệ pixel biên xuất hiện hoặc biến mất khi đi từ $f_{t-1}$ sang $f_t$, qua đó nắm bắt được các chuyển cảnh dạng fade và dissolve tốt hơn so với histogram thuần túy.
+
+Để giảm chi phí giải nén toàn bộ video, các phương pháp \textit{compressed-domain} khai thác trực tiếp dữ liệu trong dòng bit nén (ví dụ vector chuyển động và DCT coefficient của chuẩn MPEG) \cite{Kar2024_VideoSBD_IssuesChallengesSolutions}. Cách tiếp cận tương tự là dùng \textit{optical flow} để ước lượng chuyển động giữa hai khung hình: nếu trường vector flow thay đổi đột ngột về phân bố, khả năng cao đó là một ranh giới shot. Các phương pháp này tiết kiệm chi phí tính toán nhưng độ chính xác phụ thuộc mạnh vào chất lượng tín hiệu chuyển động được nén và thường yêu cầu tinh chỉnh ngưỡng theo từng bộ mã hóa-giải mã.
+
+\subsection{Hạn chế của phương pháp cổ điển trên video ngắn}
+Khi áp dụng vào video ngắn, các phương pháp cổ điển bộc lộ ba hạn chế cốt lõi:
+\begin{enumerate}
+    \item \textbf{Độ phụ thuộc ngưỡng cao:} Mỗi tập dữ liệu hoặc thậm chí từng video cần một ngưỡng riêng để cân bằng Precision--Recall. Trong video ngắn với nhịp cắt dày và phong cách hậu kỳ đa dạng, một ngưỡng cố định khó đạt hiệu quả tổng quát.
+    \item \textbf{Kém bền vững với nhiễu thị giác:} Đèn flash, chuyển động máy quay nhanh và hiệu ứng kỹ xảo trong nội bộ shot dễ tạo ra các đỉnh giả trong tín hiệu khoảng cách, dẫn đến cảnh báo giả.
+    \item \textbf{Yếu với chuyển cảnh dần phức tạp:} Các hiệu ứng dissolve, wipe và morph có gradient thay đổi mượt theo thời gian, khiến độ đo dựa trên khác biệt liền kề không tạo ra đỉnh đủ rõ để vượt ngưỡng.
+\end{enumerate}
+Những hạn chế này đặt nền tảng cho việc chuyển sang hướng học đặc trưng từ dữ liệu, được trình bày trong mục tiếp theo.
+
+\section{Phương pháp học sâu}
+\label{sec:deep_learning_methods}
+Sự phát triển của mạng nơ-ron tích chập (CNN), mạng tích chập 3D (3D ConvNet) và đặc biệt là kiến trúc Transformer đã giúp SBD chuyển từ đặc trưng thủ công sang đặc trưng học được. Cách tiếp cận này tăng đáng kể độ chính xác và khả năng mô hình hóa ngữ cảnh không-thời gian. Mục này lần lượt khảo sát các mô hình tiêu biểu theo trình tự lịch sử phát triển.
+
+\subsection{DeepSBD và biến thể C3D}
+DeepSBD do Hassanien và cộng sự đề xuất \cite{hassanien2017largescale} là một trong những mô hình SBD học sâu đầu tiên cho kết quả thuyết phục trên quy mô lớn. Mạng sử dụng kiến trúc C3D \cite{tran2015c3d} để trích xuất đặc trưng không-thời gian từ một clip ngắn gồm 16 khung hình liên tiếp. Đầu ra của C3D được đưa qua một bộ phân loại đa lớp để dự đoán đồng thời ba khả năng: \textit{không có chuyển cảnh}, \textit{cut}, hoặc \textit{gradual}.
+
+Điểm mạnh của DeepSBD nằm ở khả năng học đặc trưng không-thời gian đầu-cuối, qua đó tránh được nhược điểm của ngưỡng thủ công ở phương pháp cổ điển. Kết quả trên các bộ dữ liệu lớn cho thấy DeepSBD vượt trội đáng kể so với các mô hình cơ sở cổ điển trên chuyển cảnh khó và dữ liệu đa miền. Tuy nhiên, kiến trúc dựa trên C3D có hai hạn chế:
+\begin{itemize}
+    \item Số lượng tham số lớn (khoảng 78 triệu theo cấu hình gốc~\cite{tran2015c3d}) khiến chi phí huấn luyện cao và dễ quá khớp trên các tập dữ liệu vừa và nhỏ.
+    \item Cửa sổ thời gian cố định 16 khung hình hạn chế khả năng nắm bắt các chuyển cảnh dần kéo dài, vốn phổ biến trong video ngắn.
+\end{itemize}
+
+\subsection{TransNet và TransNetV2}
+TransNet \cite{soucek2019transnet} và TransNetV2 \cite{soucek2020transnetv2} là các mô hình cơ sở mạnh trong SBD hiện đại. TransNetV2 khai thác các khối tích chập giãn cho phép tăng trường tiếp nhận thời gian mà không tăng số tham số tương ứng. Cùng với kỹ thuật \textit{kernel factorization} tách 3D convolution thành chuỗi 2D + 1D convolution, TransNetV2 đạt mức cân bằng tốt giữa độ chính xác và chi phí tính toán.
+
+Hai cải tiến đáng chú ý của TransNetV2 so với TransNet là:
+\begin{itemize}
+    \item \textbf{Nhánh đặc trưng tương đồng (frame similarity branch):} Tính ma trận tương đồng giữa các khung hình trong cùng cửa sổ, cung cấp tín hiệu phụ trợ giúp mô hình phân biệt chuyển cảnh thật với nhiễu chuyển động.
+    \item \textbf{Hai đầu phân loại song song:} Một đầu dự đoán xác suất chuyển cảnh đơn-khung (single-frame chuyển cảnh), một đầu dự đoán xác suất "thuộc về một chuyển cảnh dần" (all-frames-of-chuyển cảnh). Hai tín hiệu này được kết hợp ở giai đoạn suy diễn để vừa định vị chính xác vị trí cut, vừa bao quát được toàn bộ vùng gradual.
+\end{itemize}
+
+Tuy là mô hình cơ sở mạnh, TransNetV2 chủ yếu được tối ưu trên các bộ dữ liệu video dài (phim, tài liệu) như BBC Planet Earth và RAI. Khi áp dụng sang video ngắn có shot dày đặc, hiệu ứng chuyển cảnh phức tạp và nhiều nhiễu thị giác, kiến trúc mạng xương sống cố định bộc lộ giới hạn về tổng quát hóa. Chi tiết kiến trúc và hàm mục tiêu của TransNetV2 được trình bày đầy đủ trong Chương~\ref{ch:phuong_phap_de_xuat} (Phần A) vì TransNetV2 đóng vai trò mô hình cơ sở trực tiếp của khóa luận.
+
+\subsection{Tiếp cận Transformer và multi-modal}
+Sau thành công của Transformer \cite{vaswani2017attention} trong xử lý chuỗi, nhiều nghiên cứu SBD gần đây áp dụng cơ chế self-attention để mô hình hóa phụ thuộc xa giữa các khung hình. Esteve và cộng sự \cite{esteve2023shot} đề xuất một mô hình kết hợp 3D depthwise convolution với visual attention, cho thấy attention có thể bổ trợ tốt cho convolution trong việc phát hiện các chuyển cảnh dần dài. Theo cùng hướng, nhiều công trình khảo sát trong các tổng kết gần đây \cite{Kar2024_VideoSBD_IssuesChallengesSolutions} cho thấy xu hướng dùng kết hợp đa phương thức (kết hợp đặc trưng hình ảnh với âm thanh hoặc tín hiệu chuyển động) để tăng tính bền vững khi chuyển miền dữ liệu.
+
+Mặc dù vậy, các phương pháp dựa trên Transformer thường có chi phí tính toán cao do độ phức tạp bậc hai theo độ dài chuỗi, và việc thiết kế thủ công không gian ứng viên cho từng đặc thù dữ liệu vẫn là vấn đề mở. Đây chính là động cơ dẫn đến hướng tiếp cận tiếp theo: để máy tự tìm kiến trúc thay vì thiết kế thủ công.
+
+\section{Neural Architecture Search trong thị giác máy tính và SBD}
+\label{sec:nas_for_sbd}
+
+\subsection{Tổng quan NAS}
+Neural Architecture Search (NAS) là kỹ thuật tự động hóa quá trình thiết kế kiến trúc mạng nơ-ron. Một bài toán NAS được đặc trưng bởi ba thành phần chính \cite{elsken2018_nas_survey}:
+\begin{itemize}
+    \item \textbf{Không gian tìm kiếm} ($\mathcal{A}$): tập hợp tất cả các kiến trúc khả dĩ. Có thể là toàn bộ mạng (macro search), một khối lặp lại (cell-based) hoặc tổ hợp phân cấp (hierarchical).
+    \item \textbf{Chiến lược tìm kiếm}: cách thuật toán duyệt không gian $\mathcal{A}$. Các họ phương pháp tiêu biểu gồm học tăng cường (RL), giải thuật tiến hóa (EA), và phương pháp khả vi (DARTS \cite{liu2019darts}).
+    \item \textbf{Chiến lược ước tính hiệu suất}: cách đánh giá nhanh một kiến trúc ứng viên mà không cần huấn luyện từ đầu. Kỹ thuật nổi bật là \textit{one-shot NAS} với cơ chế chia sẻ trọng số trong một \textit{SuperNet} duy nhất \cite{guo2020spos}.
+\end{itemize}
+
+Trong ba thành phần trên, chiến lược ước tính hiệu suất là yếu tố quyết định tính khả thi tính toán của NAS. Phương pháp \textit{Single-Path One-Shot} (SPOS) \cite{guo2020spos} huấn luyện một SuperNet chứa mọi đường đi ứng viên với cơ chế lấy mẫu đồng đều, sau đó các kiến trúc con kế thừa trọng số từ SuperNet và chỉ cần đánh giá trực tiếp trên tập kiểm định mà không cần huấn luyện lại. Cách tiếp cận này giảm chi phí NAS từ hàng nghìn GPU-day xuống còn vài chục GPU-hour, mở đường cho NAS thực tế trong các bài toán thị giác máy tính cụ thể như SBD.
+
+\section{AutoShot và vị trí trong dòng nghiên cứu SBD}
+AutoShot \cite{zhu2023autoshot} là công trình tiêu biểu đưa NAS vào bài toán SBD, đặc biệt hướng đến video ngắn. Đóng góp của AutoShot gồm hai phần:
+\begin{itemize}
+    \item \textbf{Bộ dữ liệu SHOT:} Bộ dữ liệu video ngắn quy mô lớn đầu tiên dành cho SBD, gồm 853 video với 11{,}606 chú thích ranh giới shot, kèm cơ chế làm mờ khuôn mặt để bảo vệ quyền riêng tư.
+    \item \textbf{Mô hình AutoShot:} Sử dụng SuperNet một lần bắn theo phong cách SPOS \cite{guo2020spos} trên không gian tìm kiếm gồm bốn biến thể khối tích chập giãn (DDCNNV2, A, B, C). Tổng kích thước không gian tìm kiếm vào khoảng 83.9 triệu kiến trúc ứng viên. Quá trình tìm kiếm sử dụng Bayesian Optimization, kèm hai kỹ thuật huấn luyện lại là \textit{Knowledge Distillation} \cite{hinton2015distilling} và \textit{Weight Grafting} theo entropy.
+\end{itemize}
+
+Trên tập SHOT, AutoShot cho thấy ưu thế rõ rệt so với mô hình cơ sở TransNetV2, xác nhận tiềm năng của hướng NAS trong môi trường shot ngắn và chuyển cảnh phức tạp. Tuy nhiên, AutoShot tập trung tối ưu phần mạng xương sống mà chưa khảo sát sâu các kỹ thuật ở tầng phân loại và hậu xử lý (Focal Loss, nhãn many-hot, hiệu chỉnh nhiệt độ, làm mượt Gaussian). Đây chính là khoảng trống mà phiên bản cải tiến \textit{AutoShotV2} của khóa luận hướng đến lấp đầy, được trình bày trong Phần B của Chương~\ref{ch:phuong_phap_de_xuat}.
+
+\section{So sánh tổng quan các công trình liên quan}
+\label{sec:method_comparison_table}
+Bảng~\ref{tab:related_work_comparison} tổng hợp các nhóm phương pháp tiêu biểu theo hướng tiếp cận, loại mô hình, bộ dữ liệu thường được sử dụng, ưu điểm và hạn chế. Mục tiêu của bảng là đặt các công trình liên quan vào cùng một bức tranh phương pháp luận; các kết quả định lượng chi tiết được trình bày riêng ở Chương~\ref{ch:ket_qua_thuc_nghiem}.
+
+\begin{table}[htbp]
+    \centering
+    \caption[So sánh tổng quan các nhóm phương pháp SBD]{So sánh tổng quan các nhóm phương pháp SBD theo hướng tiếp cận, loại mô hình, bộ dữ liệu thường dùng, ưu điểm và hạn chế.}
+    \label{tab:related_work_comparison}
+    \footnotesize
+    \begin{tabularx}{\textwidth}{L{2.7cm} L{2.6cm} L{2.8cm} X X}
+        \toprule
+        \textbf{Nhóm phương pháp} & \textbf{Loại mô hình} & \textbf{Bộ dữ liệu (Dataset) thường dùng} & \textbf{Ưu điểm} & \textbf{Hạn chế} \\
+        \midrule
+        Đặc trưng thủ công & Histogram, pixel difference, edge-based, compressed-domain & BBC, RAI và các tập video truyền thống & Đơn giản, dễ triển khai, chi phí thấp & Phụ thuộc ngưỡng, dễ nhiễu bởi ánh sáng/chuyển động, yếu với chuyển cảnh dần phức tạp \\
+        Đặc trưng học sâu \cite{hassanien2017largescale} & 3D ConvNet/C3D & Tập dữ liệu SBD quy mô lớn & Học đặc trưng không-thời gian đầu-cuối, giảm phụ thuộc đặc trưng thủ công & Nhiều tham số, chi phí huấn luyện cao, cửa sổ thời gian cố định \\
+        TransNet/TransNetV2 \cite{soucek2019transnet,soucek2020transnetv2} & CNN 3D giãn nở, frame similarity, hai đầu phân loại & BBC, RAI, ClipShots & Mô hình cơ sở mạnh, cân bằng tốt giữa độ chính xác và tốc độ & Mạng xương sống thiết kế thủ công, chưa tối ưu riêng cho video ngắn có nhịp cắt dày \\
+        AutoShot \cite{zhu2023autoshot} & NAS trên mạng xương sống SBD & SHOT, ClipShots và các tập đánh giá bổ sung & Tự động tìm kiến trúc phù hợp hơn với video ngắn, kế thừa quy trình mạnh từ TransNetV2 & Chi phí NAS cao, còn ít phân tích về tầng phân loại và hậu xử lý xác suất \\
+        AutoShotV2 & Mạng xương sống AutoShot + cải tiến tầng phân loại & SHOT, BBC, ClipShots & Tập trung cải thiện tầng phân loại và hậu xử lý mà không thay đổi toàn bộ mạng xương sống & Cần kiểm tra thêm khả năng tổng quát hóa đa miền và các biến thể chuyển cảnh phức tạp \\
+        \bottomrule
+    \end{tabularx}
+\end{table}
+
+\section{Vấn đề tồn tại và khoảng trống nghiên cứu}
+\label{sec:research_gaps}
+Từ khảo sát ở các mục \ref{sec:classical_methods}--\ref{sec:nas_for_sbd} và bảng so sánh tổng quan~\ref{tab:related_work_comparison}, Khóa luận xác định ba khoảng trống nghiên cứu chính làm cơ sở cho phương pháp đề xuất:
+
+\begin{itemize}
+    \item \textbf{Khoảng trống 1 -- Sai khác miền dữ liệu giữa video dài truyền thống và video ngắn hiện đại.} Hầu hết các kiến trúc mạnh hiện nay (đặc biệt TransNetV2) được tối ưu trên dữ liệu video dài như BBC Planet Earth và RAI, vốn có nhịp cắt cảnh thưa và ít hiệu ứng kỹ xảo. Khi chuyển sang video ngắn -- nơi shot trung bình ngắn dưới 5 giây và xuất hiện dày đặc các hiệu ứng dissolve/wipe -- các kiến trúc này không còn tối ưu. NAS là một hướng tiềm năng để giải quyết, nhưng chi phí tính toán của NAS vẫn là rào cản với nhiều đơn vị nghiên cứu vừa và nhỏ.
+ 
+    \item \textbf{Khoảng trống 2 -- Tổng quát hóa đa miền chưa được giải quyết trọn vẹn.} Mô hình tối ưu cho một miền dữ liệu có thể suy giảm khi chuyển sang các miền khác như ClipShots hoặc BBC. Hiện tượng dịch chuyển miền dữ liệu trong SBD chưa có giải pháp tổng quát: các nghiên cứu hiện hành thường báo cáo kết quả tốt nhất trên một bộ dữ liệu mục tiêu mà chưa phân tích hệ thống mức suy giảm chéo. Điều này tạo nhu cầu cho các thực nghiệm đánh giá chéo có hệ thống, như được tiến hành trong Chương~\ref{ch:ket_qua_thuc_nghiem} của khóa luận.
+ 
+    \item \textbf{Khoảng trống 3 -- Thiếu phân tích hệ thống về hiệu chỉnh xác suất và hậu xử lý.} Phần lớn các công trình SBD tập trung cải tiến mạng xương sống (DeepSBD, TransNetV2, AutoShot) trong khi ít phân tích hệ thống về các kỹ thuật ở tầng đầu ra: hàm mất mát cho dữ liệu mất cân bằng (Focal Loss \cite{Lin2017FocalLoss}), giám sát theo ranh giới với nhãn many-hot, hiệu chỉnh nhiệt độ (temperature scaling \cite{Guo2017Calibration}) để cải thiện độ tin cậy (calibration) của xác suất dự đoán, và làm mượt Gaussian để giảm phổ tần số cao trong dòng xác suất đầu ra. Đây là khoảng trống mà khóa luận trực tiếp đề xuất giải pháp thông qua AutoShotV2.
+\end{itemize}
+ 
+\noindent
+Ba khoảng trống này tương ứng trực tiếp với RQ1, RQ3 và RQ2 ở Mục~\ref{sec:research_questions}: NAS cho video ngắn, tổng quát hóa đa miền, và hiệu chỉnh tầng đầu ra. Đây là động lực cốt lõi để Chương~\ref{ch:phuong_phap_de_xuat} của khóa luận triển khai phương pháp đề xuất theo hướng: giữ nền tảng kiến trúc mạng xương sống mạnh từ AutoShot, đồng thời tăng cường khả năng thích nghi với video ngắn và tổng quát hóa đa miền thông qua thiết kế lại tầng phân loại và quy trình huấn luyện--hậu xử lý.
+
+\section{Tổng kết chương}
+Chương này đã trình bày bức tranh công trình liên quan từ phương pháp cổ điển đến học sâu hiện đại và NAS, kèm theo công thức hình thức cho các độ đo cổ điển và phân tích đặc trưng kiến trúc của các mô hình học sâu tiêu biểu (DeepSBD, TransNetV2, AutoShot, các biến thể Transformer/multi-modal). Bảng so sánh tổng quan cho thấy mỗi hướng tiếp cận có ưu điểm và giới hạn riêng, đặc biệt là khoảng cách giữa dữ liệu video dài truyền thống và video ngắn hiện đại. Từ các quan sát trên, ba khoảng trống nghiên cứu đã được xác định rõ -- sai khác miền dữ liệu, tổng quát hóa đa miền và hiệu chỉnh xác suất đầu ra -- là nền tảng trực tiếp cho Chương~\ref{ch:phuong_phap_de_xuat}, nơi khóa luận đi sâu vào nền tảng kế thừa và phương pháp đề xuất.
