@@ -33,7 +33,7 @@
 
 \begin{document}
 
-\title{Calibration and Frozen-Feature Adaptation for Shot Boundary Detection: A Reproducibility Study}
+\title{AutoShotV2: Calibrated Classification and Post-Processing for Short-Video Shot Boundary Detection}
 
 \author{Senh~Manh~Tang, Tien~Manh~Do, and Thai~Son~Tran%
 \thanks{S. M. Tang and T. M. Do are with the Faculty of Information Technology,
@@ -41,25 +41,26 @@ University of Science, Vietnam National University Ho Chi Minh City, Vietnam.
 T. S. Tran supervised this research.}}
 
 \markboth{IEEE Journal Paper Draft,~June~2026}%
-{Tang \MakeLowercase{\textit{et al.}}: Calibration and Frozen-Feature Adaptation for SBD}
+{Tang \MakeLowercase{\textit{et al.}}: AutoShotV2: Calibrated Classification and Post-Processing for Short-Video SBD}
 
 \maketitle
 
 \input{sections/abstract.tex}
 
 \begin{IEEEkeywords}
-Shot boundary detection, short video, AutoShot, frozen features, temperature scaling, Gaussian smoothing, video understanding.
+Shot boundary detection, short video, AutoShot, frozen features, focal loss, probability calibration, temperature scaling, Gaussian smoothing, video understanding.
 \end{IEEEkeywords}
 
 \IEEEpeerreviewmaketitle
 
 \input{sections/1_introduction.tex}
 \input{sections/2_related_work.tex}
-\input{sections/3_method.tex}
-\input{sections/4_experiments.tex}
-\input{sections/5_discussion.tex}
-\input{sections/6_conclusion.tex}
-\input{sections/7_acknowledgment.tex}
+\input{sections/3_foundation.tex}
+\input{sections/4_method.tex}
+\input{sections/5_experiments.tex}
+\input{sections/6_discussion.tex}
+\input{sections/7_conclusion.tex}
+\input{sections/8_acknowledgment.tex}
 \ifCLASSOPTIONcaptionsoff
   \newpage
 \fi
@@ -122,6 +123,24 @@ N. Houlsby, A. Giurgiu, S. Jastrzebski, B. Morrone, Q. de Laroussilhe, A. Gesmun
 
 \bibitem{hu2022lora}
 E. J. Hu, Y. Shen, P. Wallis, Z. Allen-Zhu, Y. Li, S. Wang, L. Wang, and W. Chen, ``LoRA: Low-rank adaptation of large language models,'' in \emph{Proc. International Conference on Learning Representations}, 2022.
+
+\bibitem{baraldi2015shot}
+L. Baraldi, C. Grana, and R. Cucchiara, ``Shot and scene detection via hierarchical clustering for re-using broadcast video,'' in \emph{Proc. Computer Analysis of Images and Patterns}, 2015, pp. 801--811.
+
+\bibitem{hassanien2017deepsbd}
+A. Hassanien, M. Elgharib, A. Selim, S.-H. Bae, M. Hefeeda, and W. Matusik, ``Large-scale, fast and accurate shot boundary detection through spatio-temporal convolutional neural networks,'' \emph{arXiv preprint arXiv:1705.03281}, 2017.
+
+\bibitem{vaswani2017attention}
+A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N. Gomez, L. Kaiser, and I. Polosukhin, ``Attention is all you need,'' in \emph{Proc. Advances in Neural Information Processing Systems}, 2017, pp. 5998--6008.
+
+\bibitem{guo2020spos}
+Z. Guo, X. Zhang, H. Mu, W. Heng, Z. Liu, Y. Wei, and J. Sun, ``Single path one-shot neural architecture search with uniform sampling,'' in \emph{Proc. European Conference on Computer Vision}, 2020, pp. 544--560.
+
+\bibitem{liu2019darts}
+H. Liu, K. Simonyan, and Y. Yang, ``DARTS: Differentiable architecture search,'' in \emph{Proc. International Conference on Learning Representations}, 2019.
+
+\bibitem{muller2019label}
+R. M\"uller, S. Kornblith, and G. E. Hinton, ``When does label smoothing help?'' in \emph{Proc. Advances in Neural Information Processing Systems}, 2019, pp. 4694--4703.
 
 \end{thebibliography}
 
