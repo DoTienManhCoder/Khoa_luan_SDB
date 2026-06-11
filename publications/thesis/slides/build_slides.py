@@ -879,7 +879,6 @@ def slide_training(prs):
         ("Backbone đóng băng: ", "giữ nguyên trọng số AutoShot."),
         ("Chỉ huấn luyện ClassificationHead ", "(input 4864-D)."),
         ("Warm-up + cosine annealing ", "learning rate."),
-        ("EMA ", "cho loss và trọng số → ổn định."),
         ("Early stopping ", "theo F1 trên validation."),
         ("Focal Loss + Many-hot labels ", "kết hợp trong head 2 đầu ra."),
     ], size=14, line_spacing=1.35)
@@ -897,7 +896,6 @@ def slide_training(prs):
         ("Gaussian σ",    "2.0"),
         ("Threshold (V2)", "0.02"),
         ("LR schedule",   "Warm-up + Cosine"),
-        ("EMA",           "Bật"),
         ("Head size",     "4864 → 1024 → 1"),
     ]
     row_h = Inches(0.55)

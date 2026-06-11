@@ -109,11 +109,11 @@ Bảng~\ref{tab:extra_sweep_peaks} cho thấy cấu hình mới tạo ra các đ
 \section{Thực nghiệm phân rã (phân rã study)}
 \label{sec:ablation}
 
-Bảng~\ref{tab:ablation_controlled} và Bảng~\ref{tab:ema_study} phân tách đóng góp của từng thành phần. Cần phân biệt \textit{hai pipeline khác nhau}: (i) pipeline triển khai Pha 2 --- chỉ huấn luyện lại tầng phân loại trên đặc trưng đã trích sẵn (đóng băng mạng xương sống) --- được phân rã có kiểm soát ở Bảng~\ref{tab:ablation_controlled}; và (ii) một nghiên cứu fine-tune \textit{toàn bộ} mô hình trên ClipShots nhằm cô lập tác động của EMA, trình bày riêng ở Bảng~\ref{tab:ema_study}. Hai pipeline dùng dữ liệu huấn luyện và hệ số nhiệt độ khác nhau nên F1 không so trực tiếp được; điểm nhất quán là SHOT gần như bằng nhau ($\BFourShotFOne$ ở $B4$ so với $\ASVTwoShotFOne$ của cấu hình triển khai chính).
+Bảng~\ref{tab:ablation_controlled} phân tách đóng góp của từng thành phần trên pipeline triển khai Pha 2 --- chỉ huấn luyện lại tầng phân loại trên đặc trưng đã trích sẵn (đóng băng mạng xương sống) --- theo một matrix phân rã có kiểm soát. Lưu ý hệ số nhiệt độ ở matrix này khác cấu hình triển khai chính (do chạy trên tập con metadata) nên F1 không so trực tiếp được; điểm nhất quán là SHOT gần như bằng nhau ($\BFourShotFOne$ ở $B4$ so với $\ASVTwoShotFOne$ của cấu hình triển khai chính).
 
 \begin{table}[H]
 \centering
-\caption[Ablation thành phần có kiểm soát (pipeline Pha 2)]{Ablation thành phần có kiểm soát trên pipeline Pha 2 (huấn luyện tầng phân loại trên đặc trưng cache). Control là $A1$ (BCE + one-hot, không EMA); hậu xử lý dùng $T^*=0.6618$ (khác $T^*=0.3878$ của cấu hình triển khai chính, do chạy trên tập con metadata). $A0$ là AutoShot gốc, báo cáo bằng best-threshold sweep, đóng vai trò mốc tham chiếu. Số đậm đánh dấu cấu hình $B4$ được chọn để triển khai (không phải giá trị lớn nhất theo cột).}
+\caption[Ablation thành phần có kiểm soát (pipeline Pha 2)]{Ablation thành phần có kiểm soát trên pipeline Pha 2 (huấn luyện tầng phân loại trên đặc trưng cache). Control là $A1$ (BCE + one-hot); hậu xử lý dùng $T^*=0.6618$ (khác $T^*=0.3878$ của cấu hình triển khai chính, do chạy trên tập con metadata). $A0$ là AutoShot gốc, báo cáo bằng best-threshold sweep, đóng vai trò mốc tham chiếu. Số đậm đánh dấu cấu hình $B4$ được chọn để triển khai (không phải giá trị lớn nhất theo cột).}
 \label{tab:ablation_controlled}
 \small
 \begin{tabular}{lccc}
@@ -125,28 +125,13 @@ Bảng~\ref{tab:ablation_controlled} và Bảng~\ref{tab:ema_study} phân tách 
 \end{tabular}
 \end{table}
 
-Trong matrix có kiểm soát này, hậu xử lý là đòn bẩy lớn nhất: $B4$ (Temperature + Gaussian) nâng F1 rõ rệt so với control $A1$ trên SHOT ($+1.6$ điểm phần trăm) và ClipShots ($+4.6$ điểm phần trăm), trong khi Focal Loss hay many-hot riêng lẻ gần như không thay đổi. Cấu hình $P1$ (chỉ Gaussian) tuy tăng mạnh ClipShots nhưng làm giảm BBC xuống dưới ngưỡng guardrail, nên không được chọn; $B4$ giữ BBC gần như không đổi nên là cấu hình triển khai. EMA \textit{không} nằm trong matrix này; tác động của EMA được khảo sát riêng ở chế độ fine-tune toàn model bên dưới.
-
-\begin{table}[H]
-\centering
-\caption[Nghiên cứu EMA trên pipeline fine-tune toàn model]{Nghiên cứu EMA trên một pipeline riêng: fine-tune \textit{toàn bộ} mô hình trên ClipShots train (khác Pha 2 vốn chỉ huấn luyện tầng phân loại). $A$ = Pha 1 thô; $B$ = + Gaussian; hai dòng $D$ là fine-tune không EMA (control) và fine-tune có EMA toàn model ($\beta=0.999$). Số đậm là giá trị tốt nhất theo cột.}
-\label{tab:ema_study}
-\small
-\begin{tabular}{lccc}
-\toprule
-\textbf{Cấu hình} & \textbf{SHOT} & \textbf{BBC} & \textbf{ClipShots} \\
-\midrule
-\EMAStudyRows
-\bottomrule
-\end{tabular}
-\end{table}
+Trong matrix có kiểm soát này, hậu xử lý là đòn bẩy lớn nhất: $B4$ (Temperature + Gaussian) nâng F1 rõ rệt so với control $A1$ trên SHOT ($+1.6$ điểm phần trăm) và ClipShots ($+4.6$ điểm phần trăm), trong khi Focal Loss hay many-hot riêng lẻ gần như không thay đổi. Cấu hình $P1$ (chỉ Gaussian) tuy tăng mạnh ClipShots nhưng làm giảm BBC xuống dưới ngưỡng guardrail, nên không được chọn; $B4$ giữ BBC gần như không đổi nên là cấu hình triển khai.
 
 \noindent
-Nhận xét từ hai bảng phân rã:
+Nhận xét từ bảng phân rã:
 \begin{itemize}
     \item \textbf{Hậu xử lý là thành phần tác động lớn nhất.} Gaussian smoothing (và kết hợp với temperature ở $B4$) cải thiện rõ trên ClipShots và SHOT; các thành phần huấn luyện như Focal Loss hay many-hot chỉ tạo thay đổi nhỏ hoặc không ổn định.
-    \item \textbf{EMA thuộc một pipeline riêng, không phải thành phần của mô hình triển khai.} So với control không EMA (Bảng~\ref{tab:ema_study}), EMA toàn model cho F1 cao hơn trên cả ba bộ ($+0.0046$ trên SHOT, $+0.0110$ trên BBC, $+0.0222$ trên ClipShots) và đạt F1 cao nhất trên BBC --- miền nằm ngoài phân phối huấn luyện. Tuy nhiên EMA vẫn không vượt được cấu hình ``Pha 1 + Gaussian'' trên SHOT và ClipShots (chênh $\le 0.004$), và mới chỉ khảo sát với một giá trị $\beta=0.999$. Do đó EMA được trình bày như một phân tích bổ trợ, không phải một bước trong cấu hình triển khai.
-    \item \textbf{ClipShots vẫn là điểm yếu chung.} Ở cả hai pipeline, fine-tune chưa vượt được baseline gốc một cách ổn định trên ClipShots, củng cố nhận định về hạn chế tổng quát hóa sang miền này (phân tích định lượng thêm ở Mục~\ref{sec:calibration} và phần phân tích lỗi).
+    \item \textbf{ClipShots vẫn là điểm yếu chung.} Fine-tune chưa vượt được baseline gốc một cách ổn định trên ClipShots, củng cố nhận định về hạn chế tổng quát hóa sang miền này (phân tích định lượng thêm ở Mục~\ref{sec:calibration} và phần phân tích lỗi).
 \end{itemize}
 
 \begin{figure}[H]
