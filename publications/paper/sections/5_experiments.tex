@@ -1,20 +1,152 @@
 \section{Experiments}
 
-\subsection{Datasets and Fixed Protocol}
+\subsection{Datasets and Training Setup}
 
-We evaluate on the 200-video SHOT test split \cite{zhu2023autoshot}, all 11 BBC
-Planet Earth videos, and the 500-video ClipShots test split
-\cite{tang2018clipshots}. SHOT is the primary short-video benchmark, BBC tests
-long documentary footage, and ClipShots tests open-world transfer.
-
-All headline numbers use the same controlled A1 logits and the B4 operating
-point frozen by the validation-only procedure in Section III. Precision,
-recall, and F1 are micro-averaged from transition-level TP/FP/FN counts.
-Confidence intervals resample paired videos rather than individual frames.
-They quantify test-set sampling uncertainty, not training-seed uncertainty.
+We evaluate on the 200-video SHOT test split \cite{zhu2023autoshot}, all 11
+BBC Planet Earth videos \cite{baraldi2015shot}, and the 500-video ClipShots
+test split \cite{tang2018clipshots}. SHOT is the primary short-video
+benchmark; BBC tests long documentary footage with many smooth gradual
+transitions; ClipShots tests open-world transfer. Table~\ref{tab:datasets}
+summarizes their characteristics.
 
 \begin{table}[!t]
-\caption{Fixed Reproducible Evaluation Protocol}
+\caption{Dataset Characteristics Used for SBD Evaluation}
+\label{tab:datasets}
+\centering
+\scriptsize
+\renewcommand{\arraystretch}{1.08}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{L{0.95in}C{0.78in}C{0.85in}C{0.62in}}
+\toprule
+\textbf{Property} & \textbf{BBC} & \textbf{ClipShots} & \textbf{SHOT} \\
+\midrule
+Content type & Documentary & Open-world video & Short video \\
+Total videos & 11 & 4,039 & 853 \\
+Evaluation videos & 11 & 500 & 200 \\
+Avg. video length & 2,945 s & 237 s & 39.5 s \\
+Avg. shot length & 6.57 s & 15.34 s & 2.59 s \\
+Hard cuts & Many & 128,000+ & 8,890 \\
+Gradual transitions & Many & 38,000+ & 2,716 \\
+Main challenge & Gradual trans. & Diverse effects & Fast editing \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+AutoShotV2 trains only the classification head with Adam at a constant
+learning rate; Table~\ref{tab:hyperparams} lists the hyperparameters and how
+each was selected. Performance is measured by precision, recall, and F1,
+micro-averaged from transition-level TP/FP/FN counts with a matching
+tolerance of $\pm\PaperMatchTolerance$ frames.
+
+\begin{table}[!t]
+\caption{AutoShotV2 Hyperparameters}
+\label{tab:hyperparams}
+\centering
+\small
+\renewcommand{\arraystretch}{1.08}
+\begin{tabular}{L{1.25in}C{0.7in}L{0.85in}}
+\toprule
+\textbf{Component} & \textbf{Value} & \textbf{Selection} \\
+\midrule
+Focal Loss $\gamma$ & 1.0 & Grid search \\
+Focal Loss $\alpha$ & 0.5 & Grid search \\
+Learning rate & $10^{-5}$ & Adam, constant \\
+Weight decay & $10^{-4}$ & Fixed \\
+Batch size & 512 & Frame-level \\
+Maximum epochs & 20 & Fixed budget \\
+Dropout & 0.5 & Fixed \\
+Many-hot weight & 0.3 & Validation \\
+Gaussian $\sigma$ & \PaperGaussianSigma{} & Validation \\
+Deploy temperature $T^{*}$ & \PaperDeployTemperature{} & Validation BCE \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Evaluation Tracks and Reproducibility Tiers}
+\label{sec:tracks}
+
+The paper reports two evaluation tracks with different reproducibility
+tiers. \emph{Track 1 (deployed checkpoint)} provides the headline numbers:
+the head trained for deployment with the fixed configuration
+$T^{*}=\PaperDeployTemperature$, $\sigma=\PaperGaussianSigma$,
+$\theta=\PaperDeployThreshold$. Its per-dataset result JSON files are
+tracked and checksummed, but its test logits were not retained, so
+logit-level analyses cannot be re-run for this checkpoint. \emph{Track 2
+(controlled replication)} retrains the head under the frozen validation-only
+protocol of Section~\ref{sec:protocol} (configuration B4) with full logit
+caches; every confidence interval, paired bootstrap, calibration diagnostic,
+ablation, and seed study in this paper is anchored on this track. The two
+tracks use different validation pools, so their temperatures and absolute
+scores differ slightly; reporting both keeps the headline faithful to the
+deployed system while keeping every statistical claim verifiable from
+tracked artifacts.
+
+\subsection{Main Results}
+
+Table~\ref{tab:overall} reports F1 across SHOT, BBC, and ClipShots. With the
+fixed deployment configuration, AutoShotV2 reaches
+\PaperDeployShotFOne{} on SHOT and \PaperDeployBBCFOne{} on BBC, improving
+over the reproduced AutoShot baseline by \PaperDeployVsAutoShotPP{} F1
+points and over the reported TransNetV2 baseline by
+\PaperDeployVsTransNetPP{} points on SHOT (Fig.~\ref{fig:bars}). On
+ClipShots the fixed configuration reaches \PaperDeployClipFOne{}; a separate
+test-set threshold sweep reaches \PaperDeployClipBestFOne{} at
+$\theta=0.15$, reported for transparency but not treated as the fixed
+deployment result. Reported baselines use their authors' protocols, whereas
+reproduced baselines use our evaluation pipeline; the TransNetV2
+reproduction was not evaluated on SHOT.
+
+\begin{table}[!t]
+\caption{F1-Score Comparison Across Evaluation Datasets}
+\label{tab:overall}
+\centering
+\small
+\renewcommand{\arraystretch}{1.08}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{L{2.15in}C{0.55in}C{0.55in}C{0.7in}}
+\toprule
+\textbf{Method} & \textbf{SHOT} & \textbf{BBC} & \textbf{ClipShots} \\
+\midrule
+\PaperMainResultRows
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+\begin{figure}[!t]
+\centering
+\begin{tikzpicture}[font=\small]
+\pgfmathsetmacro{\vone}{(\PaperDeployShotFOne-0.70)*20}
+\pgfmathsetmacro{\vtwo}{(\PaperAutoShotShotFOne-0.70)*20}
+\pgfmathsetmacro{\vthree}{(\PaperTransNetShotFOne-0.70)*20}
+\fill[red!70] (0,2.0) rectangle (\vone,2.5);
+\node[right] at (\vone,2.25) {\PaperDeployShotFOne};
+\node[left] at (0,2.25) {AutoShotV2};
+\fill[green!60!black] (0,1.1) rectangle (\vtwo,1.6);
+\node[right] at (\vtwo,1.35) {\PaperAutoShotShotFOne};
+\node[left] at (0,1.35) {AutoShot};
+\fill[blue!60] (0,0.2) rectangle (\vthree,0.7);
+\node[right] at (\vthree,0.45) {\PaperTransNetShotFOne};
+\node[left] at (0,0.45) {TransNetV2};
+\draw[-{Stealth[length=4pt]}] (0,0) -- (5.4,0) node[below left] {F1};
+\foreach \x/\lab in {0/0.70, 1/0.75, 2/0.80, 3/0.85, 4/0.90, 5/0.95} {
+  \draw (\x,0) -- (\x,-0.07) node[below, font=\scriptsize] {\lab};
+}
+\draw (0,0) -- (0,2.7);
+\end{tikzpicture}
+\caption{F1-score comparison on SHOT. AutoShotV2 improves the reproduced
+AutoShot baseline by \PaperDeployVsAutoShotPP{} points and the reported
+TransNetV2 baseline by \PaperDeployVsTransNetPP{} points.}
+\label{fig:bars}
+\end{figure}
+
+\subsection{Controlled Component Analysis}
+
+All remaining analyses use Track 2: the controlled B4 replication whose
+protocol is summarized in Table~\ref{tab:protocol}.
+
+\begin{table}[!t]
+\caption{Fixed Reproducible Evaluation Protocol (Controlled Track)}
 \label{tab:protocol}
 \centering
 \small
@@ -30,7 +162,7 @@ Sampling & At most 160 frames/video, 3 negatives/positive \\
 Validation size & 200 videos \\
 Validation selection & 5 source-stratified folds \\
 Selection criterion & Mean macro-F1 across sources/folds \\
-Selected temperature & \PaperTemperature \\
+Selected temperature & \PaperBFourTemperature \\
 Gaussian smoothing & $\sigma=\PaperGaussianSigma$ \\
 Decision threshold & $\theta=\PaperDeployThreshold$ \\
 Matching tolerance & $\pm\PaperMatchTolerance$ frames \\
@@ -39,18 +171,16 @@ Bootstrap & 10,000 video resamples, seed 42 \\
 \end{tabular}
 \end{table}
 
-\subsection{Protocol-Matched Results}
-
 Table~\ref{tab:main_results} compares configurations that share the controlled
 Phase 2 protocol. B4 is selected exclusively by the frozen five-fold
 validation manifest. Relative to A1, B4 improves SHOT by
-\PaperASVTwoVsAOneShotPP{} F1 points and ClipShots by
-\PaperASVTwoVsAOneClipPP{} points, while BBC is unchanged after rounding.
+\PaperBFourVsAOneShotPP{} F1 points and ClipShots by
+\PaperBFourVsAOneClipPP{} points, while BBC is unchanged after rounding.
 Temperature scaling alone preserves the validation-selected operating point;
 Gaussian smoothing is the component that changes boundary decisions.
 
 \begin{table}[!t]
-\caption{Protocol-Matched F1 Scores (B4: Selected Method)}
+\caption{Protocol-Matched F1 Scores (B4: Selected Configuration)}
 \label{tab:main_results}
 \centering
 \small
@@ -105,27 +235,6 @@ interval contains zero, so we make no improvement claim for that dataset.
 \textbf{Dataset} & \textbf{$\Delta$F1} & \textbf{95\% CI} & \textbf{Excl. 0} \\
 \midrule
 \PaperPairedDeltaRows
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
-For context only, Table~\ref{tab:reported} lists numbers copied from the
-original AutoShot and TransNetV2 reports. These values use their authors'
-protocols and are not mixed into the controlled selection above.
-
-\begin{table}[!t]
-\caption{Literature-Reported F1 Scores (Context Only)}
-\label{tab:reported}
-\centering
-\small
-\renewcommand{\arraystretch}{1.08}
-\resizebox{\columnwidth}{!}{%
-\begin{tabular}{L{1.65in}C{0.55in}C{0.55in}C{0.7in}}
-\toprule
-\textbf{Method} & \textbf{SHOT} & \textbf{BBC} & \textbf{ClipShots} \\
-\midrule
-\PaperReportedBaselineRows
 \bottomrule
 \end{tabular}
 }
@@ -187,13 +296,16 @@ small aggregate ECE, consistent with domain-shifted false positives.
 \end{table}
 
 \subsection{Controlled Training Ablation}
+\label{sec:ablation}
 
-Table~\ref{tab:ablation} expands the training-time comparison. A2, A3, and B1
-show that Focal Loss and many-hot supervision do not improve the A1 control.
-B5 combines these training changes with B4 and is numerically similar on SHOT
-but slightly weaker on BBC and ClipShots. We therefore avoid attributing the
-result to the more complex training objective. A0 is omitted because its
-per-dataset best-threshold protocol is not a direct controlled comparison.
+Table~\ref{tab:ablation} reports the outcome of the design space of
+Section~\ref{sec:objectives}. A2, A3, and B1 show that Focal Loss and
+many-hot supervision do not improve the A1 control. B5 combines these
+training changes with B4 post-processing and is numerically similar on SHOT
+but slightly weaker on BBC and ClipShots. The gain therefore comes from
+calibrated post-processing rather than the more complex training objective.
+A0 is omitted because its per-dataset best-threshold protocol is not a
+direct controlled comparison.
 
 \begin{table}[!t]
 \caption{Controlled Phase 2 Ablation (A0 Historical Baseline Excluded)}
@@ -280,7 +392,7 @@ sample standard deviations. Seed-induced F1 variation is below 0.001 on SHOT
 and BBC and below 0.005 on ClipShots, an order of magnitude smaller than the
 video-sampling confidence intervals of Table~\ref{tab:confidence}; the
 pipeline is therefore stable with respect to head-training randomness. The
-absolute values differ from the headline B4 numbers because this study
+absolute values differ from the controlled B4 numbers because this study
 retrains the head from scratch and re-selects its protocol per seed (seed 42
 selected $\sigma{=}1.0$ and $\theta{=}0.30$), so the two tables answer
 different questions: Table~\ref{tab:ablation} isolates component
@@ -304,39 +416,18 @@ training-seed sensitivity end to end.
 }
 \end{table}
 
-\subsection{Archived Checkpoint Results and Limitations}
+\subsection{Limitations}
 
-For auditability, Table~\ref{tab:archived} preserves the earlier deploy
-checkpoint numbers. Only result JSON files remain for this checkpoint; its
-test logits are absent. These numbers are therefore excluded from the headline
-and confidence-interval analysis.
-
-\begin{table}[!t]
-\caption{Archived Deploy Checkpoint (Result JSON Only)}
-\label{tab:archived}
-\centering
-\small
-\renewcommand{\arraystretch}{1.08}
-\resizebox{\columnwidth}{!}{%
-\begin{tabular}{L{2.05in}C{0.55in}C{0.55in}C{0.7in}}
-\toprule
-\textbf{Archived protocol} & \textbf{SHOT} & \textbf{BBC} & \textbf{ClipShots} \\
-\midrule
-\PaperArchivedResultRows
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
-The study has four important limitations. First, the headline B4 head itself
-was trained with one seed; the three-seed study of
-Section~\ref{sec:seed_robustness} bounds optimization variability for the
-retrained pipeline (F1 sample standard deviation at or below 0.005 on every
-dataset), but it re-selects its protocol per seed and therefore does not
-reproduce the historical B4 checkpoint bit for bit. Second,
-the historical sample cache recorded 400 videos and 33,174 frames but not the
-exact selected IDs; strict manifests fix this for future runs but cannot
-retroactively prove the old cache contents. Third, validation calibration
-diagnostics reuse the temperature-selection data. Fourth, the frozen
-representation does not fully control cross-domain false positives on
-ClipShots.
+The study has four important limitations. First, the headline numbers come
+from the deployed checkpoint, whose result JSON files are tracked and
+checksummed but whose test logits were not retained
+(Section~\ref{sec:tracks}); the controlled track therefore carries every
+logit-level claim, and the three-seed study of
+Section~\ref{sec:seed_robustness} bounds optimization variability (F1 sample
+standard deviation at or below 0.005 on every dataset) without reproducing
+either checkpoint bit for bit. Second, the historical sample cache recorded
+400 videos and 33,174 frames but not the exact selected IDs; strict
+manifests fix this for future runs but cannot retroactively prove the old
+cache contents. Third, validation calibration diagnostics reuse the
+temperature-selection data. Fourth, the frozen representation does not fully
+control cross-domain false positives on ClipShots.

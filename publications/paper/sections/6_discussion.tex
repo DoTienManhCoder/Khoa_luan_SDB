@@ -1,12 +1,12 @@
 \section{Discussion}
 \label{sec:discussion}
 
-\textbf{Where the gain comes from.} The controlled ablation separates two
-mechanisms that are often conflated. Training-side changes (Focal Loss,
-many-hot supervision) leave the BCE control statistically unchanged, whereas
-post-processing moves the operating point: Gaussian smoothing changes boundary
-decisions and temperature scaling improves probability quality without
-changing the ranking. For frozen-feature pipelines this ordering matters
+\textbf{Where the gain comes from.} The controlled ablation resolves the
+design space of Section~\ref{sec:objectives}: training-side alternatives
+(Focal Loss, many-hot supervision) leave the BCE control statistically
+unchanged, whereas post-processing moves the operating point --- Gaussian
+smoothing changes boundary decisions and temperature scaling improves
+probability quality without changing the ranking. For frozen-feature pipelines this ordering matters
 practically, because the post-processing search costs CPU milliseconds per
 million frames while retraining alternatives cost GPU hours, and because the
 search can be re-run per deployment domain without touching the
