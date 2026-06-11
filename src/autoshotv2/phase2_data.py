@@ -34,12 +34,25 @@ class TimeBudgetExpired(Exception):
     pass
 
 
+# Keyed by (abspath, mtime_ns, size): metadata/checkpoint files are hashed
+# repeatedly per run (once per ablation experiment + once per manifest write);
+# memoizing avoids re-reading multi-hundred-MB files with identical content.
+_SHA256_CACHE: dict[tuple[str, int, int], str] = {}
+
+
 def sha256_file(path: str) -> str:
+    stat = os.stat(path)
+    key = (os.path.abspath(path), stat.st_mtime_ns, stat.st_size)
+    cached = _SHA256_CACHE.get(key)
+    if cached is not None:
+        return cached
     h = hashlib.sha256()
     with open(path, "rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
-    return h.hexdigest()
+    digest = h.hexdigest()
+    _SHA256_CACHE[key] = digest
+    return digest
 
 
 def hash_keys(keys: list[str]) -> str:

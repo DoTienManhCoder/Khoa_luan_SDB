@@ -10,9 +10,6 @@ from pathlib import Path
 from typing import Any
 
 from autoshotv2.ablation_report import add_deltas, flatten_metric, make_figures, write_csv, write_summary  # noqa: F401
-
-# clean_key/load_logits/scores_from_cache are re-exported here for backward
-# compatibility; canonical home is autoshotv2.common.
 from autoshotv2.common import (
     build_train_phase2_command,
     clean_key,

@@ -104,6 +104,11 @@ def restem(mapping: dict[str, Any]) -> dict[str, Any]:
 
     This is the key-normalisation fix documented in the ablation report (section 9:
     ClipShots logits use the stem while ground truth keys carry the `.mp4` suffix).
+
+    Close to `{common.normalize_key(k): v}` but deliberately kept separate:
+    normalize_key also strips a "dataset:" prefix, and the bundled calibration
+    caches this module reads cannot be re-verified here to prove the two are
+    interchangeable. Do not swap without rerunning `--reproduce` on the bundle.
     """
     out: dict[str, Any] = {}
     for key, value in mapping.items():
