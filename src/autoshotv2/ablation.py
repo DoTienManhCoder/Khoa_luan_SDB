@@ -226,7 +226,8 @@ def logits_overlap_gt(logits_path: Path, gt_path: Path) -> bool:
         logits = load_logits(logits_path)
         with gt_path.open("rb") as f:
             gt = pickle.load(f)
-    except Exception:
+    except (OSError, pickle.UnpicklingError, EOFError, KeyError, ValueError) as exc:
+        print(f"WARNING: cannot read {logits_path} or {gt_path}: {exc}", flush=True)
         return False
     pred_keys = {clean_key(key) for key in logits}
     return bool(pred_keys & set(gt))
@@ -410,7 +411,8 @@ def sample_cache_matches(
         return False
     try:
         cached = load_pickle_payload(cache_path)
-    except Exception:
+    except (OSError, pickle.UnpicklingError, EOFError, KeyError, ValueError) as exc:
+        print(f"WARNING: sample cache {cache_path} unreadable; it will be rebuilt: {exc}", flush=True)
         return False
     selected_keys = select_training_keys(
         train_keys,

@@ -7,14 +7,20 @@ are supervised, mirroring the inference pipeline). Used by `autoshotv2.train_ema
 
 import json
 import random
+import subprocess
 from pathlib import Path
 
 import numpy as np
 import torch
 from torch.utils.data import Dataset
 
-from autoshotv2.utils import get_frames, scenes2zero_one_representation
+from autoshotv2.utils import ffmpeg, get_frames, scenes2zero_one_representation
 
+# Errors get_frames can raise on a corrupt/missing video: ffmpeg decode failures,
+# subprocess fallback errors, and shape/reshape errors on truncated streams.
+_VIDEO_LOAD_ERRORS = (RuntimeError, OSError, ValueError, subprocess.CalledProcessError)
+if ffmpeg is not None:
+    _VIDEO_LOAD_ERRORS = (*_VIDEO_LOAD_ERRORS, ffmpeg.Error)
 
 WINDOW = 100
 CENTER = 50  # we predict / supervise the middle 50 frames
@@ -115,7 +121,7 @@ class ClipShotsTrainDataset(Dataset):
         while attempts < 8:
             try:
                 return self._load_one(cur)
-            except Exception as e:  # ffmpeg.Error, RuntimeError, etc.
+            except _VIDEO_LOAD_ERRORS as e:
                 last_err = e
                 fname = self.entries[cur][0]
                 print(f"[ClipShotsTrainDataset] skip {fname}: {type(e).__name__}: {str(e)[:120]}", flush=True)

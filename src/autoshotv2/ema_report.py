@@ -107,8 +107,8 @@ def main() -> None:
     # The table contains non-ASCII (α, Δ, −); avoid UnicodeEncodeError on cp1252 consoles.
     try:
         sys.stdout.reconfigure(encoding="utf-8")
-    except Exception:
-        pass
+    except (AttributeError, OSError, ValueError):
+        pass  # best-effort: stdout may be wrapped/closed (pytest capture, pipes)
 
     report = build_report(Path(args.src_dir))
     if args.out:

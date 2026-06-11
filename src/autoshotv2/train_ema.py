@@ -35,8 +35,8 @@ from autoshotv2.ema import ModelEMA
 print = partial(print, flush=True)  # noqa: A001
 try:
     sys.stdout.reconfigure(line_buffering=True)
-except Exception:
-    pass
+except (AttributeError, OSError, ValueError):
+    pass  # best-effort: stdout may be wrapped/closed (pytest capture, pipes)
 
 
 def parse_args():
