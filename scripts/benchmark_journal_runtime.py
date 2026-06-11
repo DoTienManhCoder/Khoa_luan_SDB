@@ -6,6 +6,7 @@ import argparse
 import json
 import statistics
 import time
+from collections.abc import Callable
 from pathlib import Path
 
 import torch
@@ -13,7 +14,7 @@ import torch
 from autoshotv2 import runtime
 
 
-def measure(operation, rounds: int) -> list[float]:
+def measure(operation: Callable[[], object], rounds: int) -> list[float]:
     values = []
     for _ in range(rounds):
         started = time.perf_counter()

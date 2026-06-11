@@ -26,7 +26,7 @@ WINDOW = 100
 CENTER = 50  # we predict / supervise the middle 50 frames
 
 
-def transitions_to_scenes(transitions, n_frames: int) -> np.ndarray:
+def transitions_to_scenes(transitions: list[list[int]], n_frames: int) -> np.ndarray:
     """Convert ClipShots-style `transitions=[[s,e], ...]` to scene boundaries."""
     if not transitions:
         return np.array([[0, max(0, n_frames - 1)]], dtype=np.int32)
@@ -48,8 +48,8 @@ def transitions_to_scenes(transitions, n_frames: int) -> np.ndarray:
 class ClipShotsTrainDataset(Dataset):
     """One sample = one random 100-frame window from one ClipShots train video."""
 
-    def __init__(self, clipshots_root, annotation_name: str = "train.json",
-                 video_subdir: str = "videos/train", limit: int | None = None):
+    def __init__(self, clipshots_root: str | Path, annotation_name: str = "train.json",
+                 video_subdir: str = "videos/train", limit: int | None = None) -> None:
         self.root = Path(clipshots_root)
         ann_path = self.root / "annotations" / annotation_name
         if not ann_path.is_file():
@@ -112,7 +112,7 @@ class ClipShotsTrainDataset(Dataset):
         mh_t = torch.from_numpy(win_mh.astype(np.float32))
         return frames_t, oh_t, mh_t
 
-    def __getitem__(self, idx: int):
+    def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         # Retry with another random index if ffmpeg / numpy fails on a corrupt
         # or missing video file. ClipShots train has a few non-decodable mp4s.
         attempts = 0

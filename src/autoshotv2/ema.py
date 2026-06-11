@@ -21,7 +21,7 @@ class ModelEMA:
     Integer buffers (e.g. num_batches_tracked) are copied directly.
     """
 
-    def __init__(self, model: torch.nn.Module, decay: float = 0.999, device=None):
+    def __init__(self, model: torch.nn.Module, decay: float = 0.999, device: torch.device | str | None = None) -> None:
         self.module = copy.deepcopy(model).eval()
         for p in self.module.parameters():
             p.requires_grad_(False)
@@ -39,8 +39,8 @@ class ModelEMA:
             else:
                 v.copy_(src.to(v.device))
 
-    def state_dict(self):
+    def state_dict(self) -> dict[str, torch.Tensor]:
         return self.module.state_dict()
 
-    def load_state_dict(self, state_dict) -> None:
+    def load_state_dict(self, state_dict: dict[str, torch.Tensor]) -> None:
         self.module.load_state_dict(state_dict)

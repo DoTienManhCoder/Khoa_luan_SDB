@@ -1,6 +1,7 @@
 import argparse
 import json
 import pickle
+from collections.abc import Iterator
 from pathlib import Path
 
 import numpy as np
@@ -72,7 +73,7 @@ def get_frames(video_path: Path, width: int = 48, height: int = 27) -> np.ndarra
     return runtime.decode_video_frames(video_path, width=width, height=height)
 
 
-def get_batches(frames: np.ndarray):
+def get_batches(frames: np.ndarray) -> Iterator[np.ndarray]:
     yield from runtime.iter_frame_batches(frames)
 
 
@@ -91,11 +92,11 @@ def load_checkpoint_config(checkpoint_path: Path) -> dict:
     return runtime.load_checkpoint_config(checkpoint_path)
 
 
-def load_model(checkpoint_path: Path, device: str):
+def load_model(checkpoint_path: Path, device: str) -> torch.nn.Module:
     return runtime.load_model(checkpoint_path, device)
 
 
-def predict_video_logits(model, video_path: Path, device: str) -> np.ndarray:
+def predict_video_logits(model: torch.nn.Module, video_path: Path, device: str) -> np.ndarray:
     return runtime.predict_video_logits(model, video_path, runtime.resolve_device(device))
 
 
@@ -136,7 +137,9 @@ def predictions_to_scenes(predictions: np.ndarray) -> np.ndarray:
     return runtime.predictions_to_scenes(predictions)
 
 
-def evaluate_scenes(gt_scenes: np.ndarray, pred_scenes: np.ndarray, tolerance: int = 2, return_mistakes: bool = False):
+def evaluate_scenes(
+    gt_scenes: np.ndarray, pred_scenes: np.ndarray, tolerance: int = 2, return_mistakes: bool = False
+) -> tuple:
     """Canonical two-pointer scene-boundary matcher (tp, fp, fn).
 
     Adapted from https://github.com/gyglim/shot-detection-evaluation. This is the single

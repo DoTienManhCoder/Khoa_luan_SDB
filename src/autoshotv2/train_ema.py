@@ -39,7 +39,7 @@ except (AttributeError, OSError, ValueError):
     pass  # best-effort: stdout may be wrapped/closed (pytest capture, pipes)
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Fine-tune full AutoShot model on ClipShots train with optional weight-EMA.",
     )
@@ -76,7 +76,7 @@ def alpha_tag(decay: float) -> str:
     return s.split(".")[-1] if "." in s else s
 
 
-def load_net(base_ckpt: Path, device: str):
+def load_net(base_ckpt: Path, device: str) -> torch.nn.Module:
     """Load TransNetV2Supernet, tolerantly copying only matching tensors from `base_ckpt`."""
     from autoshotv2.model.supernet import TransNetV2Supernet
 
@@ -91,7 +91,7 @@ def load_net(base_ckpt: Path, device: str):
     return model.to(device)
 
 
-def main():
+def main() -> None:
     args = parse_args()
     clipshots_root = Path(args.clipshots_root)
     base_ckpt = Path(args.base_ckpt)

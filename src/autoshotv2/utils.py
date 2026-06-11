@@ -1,4 +1,5 @@
 import subprocess
+from collections.abc import Iterator
 
 import numpy as np
 
@@ -17,7 +18,7 @@ from autoshotv2.eval import (
 )
 
 
-def get_frames(fn, width=48, height=27):
+def get_frames(fn: str, width: int = 48, height: int = 27) -> np.ndarray:
     if ffmpeg is not None:
         video_stream, err = (
             ffmpeg
@@ -40,7 +41,7 @@ def get_frames(fn, width=48, height=27):
     video = np.frombuffer(video_stream, np.uint8).reshape([-1, height, width, 3])
     return video
 
-def get_batches(frames):
+def get_batches(frames: np.ndarray) -> Iterator[np.ndarray]:
     reminder = 50 - len(frames) % 50
     if reminder == 50:
         reminder = 0
@@ -52,7 +53,7 @@ def get_batches(frames):
 
     return func()
 
-def scenes2zero_one_representation(scenes, n_frames):
+def scenes2zero_one_representation(scenes: np.ndarray, n_frames: int) -> tuple[np.ndarray, np.ndarray]:
     prev_end = 0
     one_hot = np.zeros([n_frames], np.uint64)
     many_hot = np.zeros([n_frames], np.uint64)
@@ -94,7 +95,12 @@ def scenes2zero_one_representation(scenes, n_frames):
 
     return one_hot, many_hot
 
-def evaluate_scenes(gt_scenes, pred_scenes, return_mistakes=False, n_frames_miss_tolerance=2):
+def evaluate_scenes(
+    gt_scenes: np.ndarray,
+    pred_scenes: np.ndarray,
+    return_mistakes: bool = False,
+    n_frames_miss_tolerance: int = 2,
+) -> tuple:
     """Precision/recall/F1 (+ tp/fp/fn) for scene boundaries.
 
     Thin wrapper over :func:`autoshotv2.eval.evaluate_scenes` (the single source of the
@@ -118,7 +124,12 @@ def evaluate_scenes(gt_scenes, pred_scenes, return_mistakes=False, n_frames_miss
         return p, r, f1, (tp, fp, fn), fp_mistakes, fn_mistakes
     return p, r, f1, (tp, fp, fn)
 
-def mAP_f1_p_fix_r(one_hot_pred, gt_scenes, fixed_r=0.70654, skip_map_miou=True):
+def mAP_f1_p_fix_r(
+    one_hot_pred: dict[str, np.ndarray],
+    gt_scenes: dict[str, np.ndarray],
+    fixed_r: float = 0.70654,
+    skip_map_miou: bool = True,
+) -> tuple:
     if fixed_r > 0:
         assert skip_map_miou
         eps = 0.001
