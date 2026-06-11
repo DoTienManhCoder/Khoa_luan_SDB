@@ -361,14 +361,14 @@ def render_paper_tex_tables(manifest: dict[str, Any]) -> str:
         )
 
     deploy = experiments["phase2_deploy_threshold"]["metrics"]
-    best = experiments["phase2_best_sweep"]["metrics"]
+    # The ClipShots test-set sweep (PaperDeployClipBestFOne) is deliberately
+    # NOT a table row: a threshold tuned on the test set does not belong in
+    # the main comparison; it is quoted in prose as a transparency ceiling.
     comparison_rows += [
         "AutoShotV2 (ours), fixed deploy threshold & "
         f"{paper_metric(deploy['shot']['f1'], True)} & "
         f"{paper_metric(deploy['bbc']['f1'], True)} & "
         f"{paper_metric(deploy['clipshots']['f1'])} \\\\",
-        "AutoShotV2 (ours), ClipShots best sweep & -- & -- & "
-        f"{paper_metric(best['clipshots']['f1'])} \\\\",
     ]
     lines += [r"\newcommand{\PaperMainResultRows}{%", *comparison_rows, "}", ""]
 
