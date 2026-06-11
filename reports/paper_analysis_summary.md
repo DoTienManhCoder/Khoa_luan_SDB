@@ -12,10 +12,18 @@ Controlled headline: A1 BCE one-hot logits with B4 temperature scaling and Gauss
 
 ## Validation calibration diagnostics
 
-| Variant | NLL | Brier | ECE |
-|---|---:|---:|---:|
-| Before scaling | 0.013006 | 0.002194 | 0.007149 |
-| Temperature scaled | 0.009591 | 0.001911 | 0.002214 |
+| Variant | NLL | Brier | ECE | Adaptive ECE | Balanced ECE |
+|---|---:|---:|---:|---:|---:|
+| Before scaling | 0.013006 | 0.002194 | 0.007149 | 0.007149 | 0.080506 |
+| Temperature scaled | 0.009591 | 0.001911 | 0.002214 | 0.002243 | 0.070405 |
 
 The calibration diagnostics use the same validation set that selected the temperature and are
 therefore diagnostic rather than an untouched-test estimate.
+
+## Paired F1 delta, selected method minus A1
+
+| Dataset | Delta F1 | 95% CI | Excludes zero |
+|---|---:|---:|:---:|
+| SHOT | 0.0162 | [0.0093, 0.0236] | yes |
+| BBC | -0.0000 | [-0.0033, 0.0041] | no |
+| CLIPSHOTS | 0.0457 | [0.0267, 0.0670] | yes |
