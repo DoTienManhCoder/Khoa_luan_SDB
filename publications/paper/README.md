@@ -37,5 +37,7 @@ Artifact chuẩn: `publications/paper/releases/AutoShotV2_Paper.pdf`.
 
 - SHOT và BBC dùng cấu hình deploy cố định.
 - ClipShots deploy dùng threshold 0.10; best sweep 0.15 được báo cáo riêng.
+- Bảng best theo từng dataset dùng cấu hình/ngưỡng riêng cho SHOT và ClipShots;
+  BBC giữ cấu hình deploy vì đã đạt đỉnh tại threshold 0.10.
 - Ablation Phase 2 và EMA toàn model là hai pipeline khác nhau.
 - EMA không phải thành phần của checkpoint deploy.

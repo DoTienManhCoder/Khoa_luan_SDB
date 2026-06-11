@@ -26,6 +26,43 @@ DATASET_LABELS = {
     "clipshots": "ClipShots",
 }
 
+PAPER_DATASET_BEST_CONFIG = {
+    "temperature": 0.24127588762141639,
+    "sigma": 2.0,
+    "gamma": 2.0,
+    "alpha": 0.6,
+    "manyhot_weight": 0.3,
+    "learning_rate": 7.0e-6,
+    "weight_decay": 1.0e-4,
+}
+
+PAPER_DATASET_BEST_RESULTS = {
+    "shot": {
+        "threshold": 0.12,
+        "precision": 0.8408,
+        "recall": 0.8816,
+        "f1": 0.8607,
+        "fixed_f1": 0.8545,
+        "delta_pp": 0.62,
+    },
+    "clipshots": {
+        "threshold": 0.19,
+        "precision": 0.7011,
+        "recall": 0.8554,
+        "f1": 0.7706,
+        "fixed_f1": 0.7530,
+        "delta_pp": 1.76,
+    },
+    "bbc": {
+        "threshold": 0.10,
+        "precision": 0.9750,
+        "recall": 0.9564,
+        "f1": 0.9656,
+        "fixed_f1": 0.9656,
+        "delta_pp": 0.00,
+    },
+}
+
 ABLATION_ORDER = (
     "A0_autoshot_original",
     "A1_phase2_bce_onehot",
@@ -646,10 +683,19 @@ def render_paper_tex_macros(manifest: dict[str, Any]) -> str:
         "PaperGaussianSigma": f"{deployment_config['sigma']:.1f}",
         "PaperDeployThreshold": f"{deploy['shot']['threshold']:.2f}",
         "PaperClipBestThreshold": f"{best['clipshots']['threshold']:.2f}",
+        "PaperDatasetBestTemperature": f"{PAPER_DATASET_BEST_CONFIG['temperature']:.4f}",
+        "PaperDatasetBestSigma": f"{PAPER_DATASET_BEST_CONFIG['sigma']:.1f}",
+        "PaperDatasetBestGamma": f"{PAPER_DATASET_BEST_CONFIG['gamma']:.1f}",
+        "PaperDatasetBestAlpha": f"{PAPER_DATASET_BEST_CONFIG['alpha']:.1f}",
+        "PaperDatasetBestManyHotWeight": f"{PAPER_DATASET_BEST_CONFIG['manyhot_weight']:.1f}",
+        "PaperDatasetBestLearningRate": r"7.00\times10^{-6}",
         "PaperASVTwoShotFOne": f4(best["shot"]["f1"]),
         "PaperASVTwoBBCFOne": f4(best["bbc"]["f1"]),
         "PaperASVTwoClipDeployFOne": f4(deploy["clipshots"]["f1"]),
         "PaperASVTwoClipBestFOne": f4(best["clipshots"]["f1"]),
+        "PaperASVTwoShotDatasetBestFOne": f4(PAPER_DATASET_BEST_RESULTS["shot"]["f1"]),
+        "PaperASVTwoBBCDatasetBestFOne": f4(PAPER_DATASET_BEST_RESULTS["bbc"]["f1"]),
+        "PaperASVTwoClipDatasetBestFOne": f4(PAPER_DATASET_BEST_RESULTS["clipshots"]["f1"]),
         "PaperASVTwoShotPrecision": f4(best["shot"]["precision"]),
         "PaperASVTwoShotRecall": f4(best["shot"]["recall"]),
         "PaperAutoShotShotFOne": f4(autoshot["shot"]),
@@ -699,6 +745,20 @@ def render_paper_tex_tables(manifest: dict[str, Any]) -> str:
         f"{paper_metric(best['clipshots']['f1'])} \\\\",
     ]
     lines += [r"\newcommand{\PaperMainResultRows}{%", *comparison_rows, "}", ""]
+
+    dataset_best_rows = []
+    for dataset in ("shot", "clipshots", "bbc"):
+        metric = PAPER_DATASET_BEST_RESULTS[dataset]
+        dataset_best_rows.append(
+            f"{DATASET_LABELS[dataset]} & "
+            f"{metric['threshold']:.2f} & "
+            f"{paper_metric(metric['precision'])} & "
+            f"{paper_metric(metric['recall'])} & "
+            f"{paper_metric(metric['f1'], True)} & "
+            f"{paper_metric(metric['fixed_f1'])} & "
+            f"{metric['delta_pp']:+.2f} \\\\"
+        )
+    lines += [r"\newcommand{\PaperDatasetBestRows}{%", *dataset_best_rows, "}", ""]
 
     paper_ablation_labels = {
         "A0_autoshot_original": "A0 -- AutoShot baseline",
