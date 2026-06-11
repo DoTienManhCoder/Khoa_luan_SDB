@@ -1,41 +1,10 @@
-\section{Frozen-Feature Study Design}
+\section{Proposed AutoShotV2}
+\label{sec:method}
 
-\subsection{Problem Formulation}
-
-Given a video with $T$ frames, SBD predicts a binary boundary sequence
-$\{\hat b_t\}_{t=1}^{T}$. A model first produces frame-level logits $z_t$.
-After calibration and smoothing, the final decision is
-\begin{equation}
-    \hat b_t = \mathbb{1}[\tilde p_t > \theta].
-\end{equation}
-Consecutive positive predictions are grouped into one transition interval.
-Evaluation uses the canonical interval matcher with a tolerance of
-$\pm\PaperMatchTolerance$ frames.
-
-\subsection{Frozen AutoShot Representation}
-
-AutoShot \cite{zhu2023autoshot} searches a short-video backbone composed of
-3-D convolutional, similarity, histogram, and optional temporal blocks.
-Repeating this search is outside the intended adaptation budget. We freeze the
-searched backbone and cache its 4864-dimensional feature vector
-$h_t\in\mathbb{R}^{4864}$ for each frame. The selected A1 control trains only
-a compact decision head:
-\begin{equation}
-    u_t = \mathrm{Dropout}(\mathrm{ReLU}(W_f h_t+c_f)),\qquad
-    z_t = W_c u_t+c_c,
-\end{equation}
-where $W_f\in\mathbb{R}^{1024\times4864}$. The implementation retains a second
-output for controlled auxiliary-label ablations, but its loss weight is zero
-for A1 and the deployed B4 pipeline uses only the primary logit $z_t$.
-
-The selected training objective is binary cross-entropy:
-\begin{equation}
-    \mathcal{L}_{\mathrm{BCE}}
-    = -y_t\log\sigma(z_t)-(1-y_t)\log(1-\sigma(z_t)).
-\end{equation}
-This choice is empirical rather than assumed: the controlled experiments show
-no measurable benefit from replacing it with Focal Loss or adding many-hot
-auxiliary supervision.
+AutoShotV2 improves the decision stage of SBD: it trains a new
+classification head on the frozen features of Eq.~\eqref{eq:features} and
+adds probability calibration and temporal smoothing before thresholding.
+Fig.~\ref{fig:pipeline} shows the deployed inference pipeline.
 
 \begin{figure*}[!t]
 \centering
@@ -43,55 +12,164 @@ auxiliary supervision.
 \begin{tikzpicture}[
     node distance=0.75cm and 1.0cm,
     font=\footnotesize,
-    block/.style={draw, rounded corners=2pt, thick, align=center, minimum height=0.9cm, text width=2.65cm},
+    block/.style={draw, rounded corners=2pt, thick, align=center, minimum height=0.9cm, text width=2.45cm},
     arr/.style={-{Stealth[length=5pt]}, thick}
 ]
 \node[block, fill=blue!10] (in) {Video frames\\$48\times27$ RGB};
-\node[block, fill=green!12, right=of in] (backbone) {Frozen AutoShot\\feature extractor};
+\node[block, fill=green!12, right=of in] (backbone) {Frozen AutoShot\\backbone};
 \node[block, fill=green!8, right=of backbone] (feat) {Cached features\\4864-D};
-\node[block, fill=orange!15, right=of feat] (head) {BCE primary head\\A1 control};
-\node[block, fill=purple!12, right=of head] (temp) {Temperature scaling\\$T=\PaperTemperature$};
+\node[block, fill=orange!15, right=of feat] (head) {Calibrated\\classification head};
+\node[block, fill=purple!12, right=of head] (temp) {Temperature scaling\\$T^{*}=\PaperDeployTemperature$};
 \node[block, fill=pink!14, right=of temp] (smooth) {Gaussian smoothing\\$\sigma=\PaperGaussianSigma$};
-\node[block, fill=blue!8, right=of smooth] (out) {Fixed threshold\\$\theta=\PaperDeployThreshold$};
+\node[block, fill=blue!8, right=of smooth] (out) {Threshold\\$\theta=\PaperDeployThreshold$};
+\node[block, fill=teal!12, right=of out] (bound) {Shot boundaries\\F1 $=\PaperDeployShotFOne$ (SHOT)};
 \draw[arr] (in) -- (backbone);
 \draw[arr] (backbone) -- (feat);
 \draw[arr] (feat) -- (head);
 \draw[arr] (head) -- (temp);
 \draw[arr] (temp) -- (smooth);
 \draw[arr] (smooth) -- (out);
+\draw[arr] (out) -- (bound);
 \end{tikzpicture}
 }
-\caption{Selected AutoShotV2 pipeline. B4 applies validation-selected
-temperature scaling and Gaussian smoothing to the controlled A1 BCE logits.}
+\caption{AutoShotV2 inference pipeline. The searched AutoShot backbone is
+frozen; AutoShotV2 retrains the decision stage and adds calibration and
+temporal smoothing before thresholding. The deployed checkpoint uses
+$T^{*}=\PaperDeployTemperature$; the controlled B4 replication of
+Section~\ref{sec:protocol} selects $T=\PaperBFourTemperature$ under its
+frozen validation-only protocol.}
 \label{fig:pipeline}
 \end{figure*}
+
+\subsection{Classification Head Architecture}
+\label{sec:head}
+
+The head maps each cached feature vector $h_t$ to a shared hidden state
+\begin{equation}
+    u_t = \mathrm{Dropout}\bigl(\mathrm{ReLU}(W_f h_t + c_f)\bigr),
+    \label{eq:hidden}
+\end{equation}
+with $W_f\in\mathbb{R}^{1024\times4864}$ and dropout probability $0.5$. Two
+parallel linear branches then produce logits
+\begin{equation}
+    z^{(1)}_t = W_1 u_t + c_1, \qquad z^{(2)}_t = W_2 u_t + c_2.
+    \label{eq:branches}
+\end{equation}
+The primary branch $z^{(1)}_t$ is trained against the exact one-hot boundary
+labels and is the only branch used at inference. The auxiliary branch
+$z^{(2)}_t$ can be supervised with boundary-aware many-hot targets to supply
+denser gradients around each transition. Fig.~\ref{fig:head} illustrates
+the head.
+
+\begin{figure}[!t]
+\centering
+\begin{tikzpicture}[
+    node distance=0.45cm and 0.55cm,
+    font=\footnotesize,
+    block/.style={draw, rounded corners=2pt, thick, align=center, minimum height=0.7cm, text width=2.5cm},
+    arr/.style={-{Stealth[length=4pt]}, thick}
+]
+\node[block, fill=green!8] (feat) {Feature vector\\4864-D};
+\node[block, fill=orange!12, below=of feat] (fc) {Linear $4864{\to}1024$\\ReLU};
+\node[block, fill=orange!8, below=of fc] (drop) {Dropout $p=0.5$};
+\node[block, fill=blue!10, below left=0.55cm and -0.7cm of drop] (b1) {Primary branch\\one-hot target};
+\node[block, fill=pink!14, below right=0.55cm and -0.7cm of drop] (b2) {Auxiliary branch\\many-hot target};
+\node[block, fill=purple!10, below=1.6cm of drop, text width=4.6cm] (loss)
+    {$\mathcal{L}_{\mathrm{total}}=\mathcal{L}^{(1)}+0.3\,\mathcal{L}^{(2)}$};
+\draw[arr] (feat) -- (fc);
+\draw[arr] (fc) -- (drop);
+\draw[arr] (drop) -- (b1);
+\draw[arr] (drop) -- (b2);
+\draw[arr] (b1) -- (loss);
+\draw[arr] (b2) -- (loss);
+\end{tikzpicture}
+\caption{AutoShotV2 classification head. The primary branch preserves sharp
+boundary localization; the auxiliary branch can supply denser supervision
+around each boundary. The controlled ablation selects plain BCE on the
+primary branch.}
+\label{fig:head}
+\end{figure}
+
+\subsection{Training Objectives as a Design Space}
+\label{sec:objectives}
+
+Boundary frames are exceptionally rare ($<1\%$ of frames), so the training
+loss is a natural design axis. The baseline objective is binary
+cross-entropy on the primary branch,
+\begin{equation}
+    \mathcal{L}_{\mathrm{BCE}}
+    = -y_t\log\sigma(z^{(1)}_t)-(1-y_t)\log\bigl(1-\sigma(z^{(1)}_t)\bigr).
+    \label{eq:bce}
+\end{equation}
+We explore two alternatives. First, Focal Loss~\cite{lin2017focal}
+down-weights easy negatives,
+\begin{equation}
+    \mathcal{L}_{\mathrm{focal}} = -\alpha_t\,(1-p^{*}_t)^{\gamma}\log(p^{*}_t),
+    \label{eq:focal}
+\end{equation}
+where $p^{*}_t=p_t$ for a positive target and $1-p_t$ otherwise, and
+$\alpha_t=\alpha y_t+(1-\alpha)(1-y_t)$; grid search on validation selects
+$\gamma=1.0$ and $\alpha=0.5$. Second, boundary-aware many-hot
+supervision~\cite{muller2019label} expands each ground-truth boundary $t_b$
+to its $\pm1$ frame neighborhood,
+\begin{equation}
+    y_{\mathrm{mh}}[t]=\begin{cases}1, & \exists\, t_b\ \text{s.t.}\ |t-t_b|\le 1,\\ 0, & \text{otherwise},\end{cases}
+    \label{eq:manyhot}
+\end{equation}
+and supervises the auxiliary branch with weight 0.3:
+$\mathcal{L}_{\mathrm{total}}=\mathcal{L}(\hat y^{(1)}, y_{\mathrm{oh}})
++0.3\,\mathcal{L}(\hat y^{(2)}, y_{\mathrm{mh}})$. The small auxiliary
+weight prevents the dense targets from blurring the primary branch's
+localization.
+
+These objectives are evaluated as a design space rather than assumed
+beneficial: the controlled ablation of Section~\ref{sec:ablation} shows that
+plain BCE matches both alternatives once post-processing is applied, so the
+analytic track of this paper anchors on the BCE configuration.
+
+\subsection{Probability Calibration and Temporal Smoothing}
+\label{sec:postprocess}
+
+SBD decisions rely directly on thresholding model scores, so probability
+quality matters as much as ranking. Temperature
+scaling~\cite{guo2017calibration} rescales the primary logit without
+changing its ranking:
+\begin{equation}
+    p^{\mathrm{cal}}_t=\sigma\!\left(\frac{z^{(1)}_t}{T}\right),\qquad
+    T^{*}=\arg\min_{T}\ \mathcal{L}_{\mathrm{BCE}}\!\left(\sigma\!\left(\frac{z^{(1)}}{T}\right),\,y\right),
+    \label{eq:temperature}
+\end{equation}
+with $T^{*}$ fitted on validation data. Calibration cannot remove isolated
+temporal peaks caused by flashes or camera shakes, so a one-dimensional
+Gaussian filter smooths the calibrated sequence:
+\begin{equation}
+    \tilde p_t=\sum_k G_{\sigma}(k)\,p^{\mathrm{cal}}_{t-k},\qquad
+    G_{\sigma}(k)=\frac{1}{\sqrt{2\pi}\sigma}\exp\!\left(-\frac{k^2}{2\sigma^2}\right).
+    \label{eq:gaussian}
+\end{equation}
+Two operating points of this pipeline appear in the paper: the deployed
+checkpoint fits $T^{*}=\PaperDeployTemperature$ on its validation pool,
+while the controlled B4 replication selects $T=\PaperBFourTemperature$
+under the frozen protocol below. Both use $\sigma=\PaperGaussianSigma$ and
+$\theta=\PaperDeployThreshold$.
 
 \subsection{Validation-Only Protocol Selection}
 \label{sec:protocol}
 
-Temperature scaling rescales the primary logit without changing its ranking:
-\begin{equation}
-    p_t^{\mathrm{cal}}=\sigma\left(\frac{z_t}{T}\right).
-\end{equation}
-Temperature scaling changes score calibration but cannot remove isolated
-temporal peaks. We therefore apply a one-dimensional Gaussian filter,
-\begin{equation}
-    \tilde p_t=\sum_k G_{\sigma}(k)p_{t-k}^{\mathrm{cal}},
-\end{equation}
-We select the complete operating point using five-fold validation. Folds are
-stratified by source dataset. For each held-out fold, temperature is fitted on
-the other four folds by minimizing binary cross-entropy. We search
-$\sigma\in\{0,1,2,3\}$ and
+For the controlled track, we select the complete operating point using
+five-fold validation. Folds are stratified by source dataset. For each
+held-out fold, temperature is fitted on the other four folds by minimizing
+binary cross-entropy. We search $\sigma\in\{0,1,2,3\}$ and
 $\theta\in\{0.05,0.10,\ldots,0.50\}$. Each pair is scored by first computing
 F1 per source dataset within each held-out fold, averaging those per-source
 values into a fold-level macro-F1, and then averaging the macro-F1 over the
-five folds. Ties prefer lower smoothing and then the
-threshold nearest 0.10. After selecting $\sigma$ and $\theta$, the final
-temperature is fitted on all validation videos. This procedure selects
-$T=\PaperTemperature$, $\sigma=\PaperGaussianSigma$, and
-$\theta=\PaperDeployThreshold$. The manifest containing folds, key hashes,
-search space, and selected values is written before test evaluation. We denote
-the resulting A1 plus temperature plus Gaussian configuration B4.
+five folds. Ties prefer lower smoothing and then the threshold nearest 0.10.
+After selecting $\sigma$ and $\theta$, the final temperature is fitted on
+all validation videos. This procedure selects $T=\PaperBFourTemperature$,
+$\sigma=\PaperGaussianSigma$, and $\theta=\PaperDeployThreshold$. The
+manifest containing folds, key hashes, search space, and selected values is
+written before test evaluation. We denote the resulting BCE plus temperature
+plus Gaussian configuration B4.
 
 \subsection{Cache and Run Provenance}
 
@@ -104,19 +182,3 @@ the selected video IDs, per-video sample counts, skipped inputs, configuration,
 checkpoint hash, and logit-key hash. This strict identity replaces the earlier
 path-tolerant cache check that could not prove which 400 videos produced the
 historical cache.
-
-\subsection{Training-Time Alternatives}
-
-We evaluate Focal Loss and boundary-aware many-hot targets as alternatives,
-not as components of the selected method. For binary targets, the implemented
-Focal Loss is
-\begin{equation}
-    \mathcal{L}_{\mathrm{focal}}
-    =-\alpha_t(1-p_t^*)^\gamma\log(p_t^*),
-\end{equation}
-where $p_t^*=p_t$ for a positive target and $1-p_t$ otherwise, and
-$\alpha_t=\alpha y_t+(1-\alpha)(1-y_t)$. The experiments use
-$\gamma=1$ and $\alpha=0.5$. The many-hot alternative expands each boundary
-label by one neighboring frame and applies an auxiliary loss with weight 0.3.
-These variants are retained in the ablation to establish that the B4 gain
-comes primarily from post-processing.
