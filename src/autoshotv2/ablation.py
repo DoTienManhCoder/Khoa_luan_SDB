@@ -26,6 +26,7 @@ from autoshotv2.train_phase2 import (
 # clean_key/load_logits/scores_from_cache are re-exported here for backward
 # compatibility; canonical home is autoshotv2.common.
 from autoshotv2.common import (
+    build_train_phase2_command,
     clean_key,
     load_logits,
     load_pickle_payload,
@@ -417,85 +418,52 @@ def train_run(
         return True, ""
 
     run_dir.mkdir(parents=True, exist_ok=True)
-    cmd = [
-        sys.executable,
-        "-m",
-        "autoshotv2.train_phase2",
-        "--meta",
-        str(meta_path),
-        "--base-ckpt",
-        str(base_ckpt),
-        "--sample-cache",
-        str(sample_cache),
-        "--resume-state",
-        str(run_dir / "resume.pt"),
-        "--checkpoint-dir",
-        str(run_dir / "checkpoints"),
-        "--out-ckpt",
-        str(ckpt_path),
-        "--results",
-        str(run_dir / "train_results.pkl"),
-        "--eval-cache-dir",
-        str(run_dir / "eval_cache"),
-        "--epochs",
-        str(args.epochs),
-        "--batch-size",
-        str(args.batch_size),
-        "--loss",
-        exp.loss,
-        "--manyhot-weight",
-        str(exp.manyhot_weight),
-        "--boundary-window",
-        str(exp.boundary_window),
-        "--sigma",
-        str(exp.sigma),
-        "--temperature-mode",
-        exp.temperature_mode,
-        "--max-samples-per-video",
-        str(args.max_samples_per_video),
-        "--max-total-samples",
-        str(args.max_total_samples),
-        "--neg-per-pos",
-        str(args.neg_per_pos),
-        "--min-neg-per-video",
-        str(args.min_neg_per_video),
-        "--seed",
-        str(args.seed),
-        "--data-seed",
-        str(args.data_seed),
-        "--max-train-videos",
-        str(args.max_train_videos),
-        "--max-val-videos",
-        str(args.max_val_videos),
-        "--max-test-videos",
-        str(args.max_test_videos),
-        "--save-every-videos",
-        str(args.save_every_videos),
-        "--save-every-epochs",
-        str(args.save_every_epochs),
-        "--log-every-batches",
-        str(args.log_every_batches),
-        "--stop-after-minutes",
-        str(args.stop_after_minutes),
-        "--max-cache-video-frames",
-        str(args.max_cache_video_frames),
-        "--max-cache-video-seconds",
-        str(args.max_cache_video_seconds),
-        "--data-manifest",
-        str(run_dir / "training_data_manifest.json"),
-        "--run-manifest",
-        str(run_dir / "run_manifest.json"),
-    ]
+    options = {
+        "--meta": meta_path,
+        "--base-ckpt": base_ckpt,
+        "--sample-cache": sample_cache,
+        "--resume-state": run_dir / "resume.pt",
+        "--checkpoint-dir": run_dir / "checkpoints",
+        "--out-ckpt": ckpt_path,
+        "--results": run_dir / "train_results.pkl",
+        "--eval-cache-dir": run_dir / "eval_cache",
+        "--epochs": args.epochs,
+        "--batch-size": args.batch_size,
+        "--loss": exp.loss,
+        "--manyhot-weight": exp.manyhot_weight,
+        "--boundary-window": exp.boundary_window,
+        "--sigma": exp.sigma,
+        "--temperature-mode": exp.temperature_mode,
+        "--max-samples-per-video": args.max_samples_per_video,
+        "--max-total-samples": args.max_total_samples,
+        "--neg-per-pos": args.neg_per_pos,
+        "--min-neg-per-video": args.min_neg_per_video,
+        "--seed": args.seed,
+        "--data-seed": args.data_seed,
+        "--max-train-videos": args.max_train_videos,
+        "--max-val-videos": args.max_val_videos,
+        "--max-test-videos": args.max_test_videos,
+        "--save-every-videos": args.save_every_videos,
+        "--save-every-epochs": args.save_every_epochs,
+        "--log-every-batches": args.log_every_batches,
+        "--stop-after-minutes": args.stop_after_minutes,
+        "--max-cache-video-frames": args.max_cache_video_frames,
+        "--max-cache-video-seconds": args.max_cache_video_seconds,
+        "--data-manifest": run_dir / "training_data_manifest.json",
+        "--run-manifest": run_dir / "run_manifest.json",
+    }
+    extra: list[object] = []
     if exp.use_ema:
-        cmd.extend(["--use-ema", "--ema-decay", str(exp.ema_decay)])
+        extra.extend(["--use-ema", "--ema-decay", exp.ema_decay])
     if args.no_eval_cache:
-        cmd.append("--no-eval-cache")
+        extra.append("--no-eval-cache")
     if args.skip_test_eval:
-        cmd.append("--skip-test-eval")
+        extra.append("--skip-test-eval")
     if args.rebuild_sample_cache:
-        cmd.append("--rebuild-sample-cache")
+        extra.append("--rebuild-sample-cache")
     if not args.resume_training:
-        cmd.append("--no-resume")
+        extra.append("--no-resume")
+    cmd = build_train_phase2_command(options, extra)
     return run_command(cmd, repo_dir, args.continue_on_error)
 
 

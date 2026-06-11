@@ -12,7 +12,7 @@ from typing import Any
 
 import numpy as np
 
-from autoshotv2.common import load_logits, normalize_key
+from autoshotv2.common import build_train_phase2_command, load_logits, normalize_key
 from autoshotv2.journal_protocol import load_frozen_protocol
 from autoshotv2.train_phase2 import transitions_to_scenes
 
@@ -45,6 +45,43 @@ def dataset_resources(args: argparse.Namespace) -> dict[str, tuple[Path, Path]]:
         "bbc": (args.bbc_gt, args.bbc_videos),
         "clipshots": (args.clipshots_gt, args.clipshots_videos),
     }
+
+
+def training_command(
+    args: argparse.Namespace,
+    seed: int,
+    shared: Path,
+    run_dir: Path,
+    checkpoint: Path,
+) -> list[str]:
+    """Frozen training configuration for the journal study (do not vary)."""
+    options = {
+        "--meta": args.meta,
+        "--base-ckpt": args.base_ckpt,
+        "--out-ckpt": checkpoint,
+        "--sample-cache": shared / "sample_cache.pkl",
+        "--results": run_dir / "train_results.pkl",
+        "--eval-cache-dir": run_dir / "eval_cache",
+        "--resume-state": run_dir / "resume.pt",
+        "--checkpoint-dir": run_dir / "checkpoints",
+        "--data-manifest": run_dir / "training_data_manifest.json",
+        "--run-manifest": run_dir / "run_manifest.json",
+        "--epochs": args.epochs,
+        "--batch-size": args.batch_size,
+        "--loss": "bce",
+        "--manyhot-weight": "0",
+        "--boundary-window": "0",
+        "--temperature-mode": "off",
+        "--sigma": "0",
+        "--seed": seed,
+        "--data-seed": args.data_seed,
+        "--max-train-videos": args.max_train_videos,
+        "--max-val-videos": args.max_val_videos,
+    }
+    extra = ["--skip-test-eval"]
+    if args.force:
+        extra.extend(["--no-resume", "--no-eval-cache"])
+    return build_train_phase2_command(options, extra)
 
 
 def materialize_ground_truth(args: argparse.Namespace) -> None:
@@ -283,57 +320,7 @@ def main() -> None:
         protocol_path = run_dir / "frozen_protocol.json"
 
         if args.force or not checkpoint.is_file():
-            command = [
-                sys.executable,
-                "-m",
-                "autoshotv2.train_phase2",
-                "--meta",
-                str(args.meta),
-                "--base-ckpt",
-                str(args.base_ckpt),
-                "--out-ckpt",
-                str(checkpoint),
-                "--sample-cache",
-                str(shared / "sample_cache.pkl"),
-                "--results",
-                str(run_dir / "train_results.pkl"),
-                "--eval-cache-dir",
-                str(run_dir / "eval_cache"),
-                "--resume-state",
-                str(run_dir / "resume.pt"),
-                "--checkpoint-dir",
-                str(run_dir / "checkpoints"),
-                "--data-manifest",
-                str(run_dir / "training_data_manifest.json"),
-                "--run-manifest",
-                str(run_dir / "run_manifest.json"),
-                "--epochs",
-                str(args.epochs),
-                "--batch-size",
-                str(args.batch_size),
-                "--loss",
-                "bce",
-                "--manyhot-weight",
-                "0",
-                "--boundary-window",
-                "0",
-                "--temperature-mode",
-                "off",
-                "--sigma",
-                "0",
-                "--seed",
-                str(seed),
-                "--data-seed",
-                str(args.data_seed),
-                "--max-train-videos",
-                str(args.max_train_videos),
-                "--max-val-videos",
-                str(args.max_val_videos),
-                "--skip-test-eval",
-            ]
-            if args.force:
-                command.extend(["--no-resume", "--no-eval-cache"])
-            run(command, args.dry_run)
+            run(training_command(args, seed, shared, run_dir, checkpoint), args.dry_run)
 
         if args.force or not protocol_path.is_file():
             run(

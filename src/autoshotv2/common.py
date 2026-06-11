@@ -14,6 +14,8 @@ on purpose so historical numbers stay bit-identical.
 from __future__ import annotations
 
 import pickle
+import sys
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -118,6 +120,22 @@ def f1_from_counts(values: np.ndarray) -> np.ndarray:
         out=np.zeros_like(precision),
         where=(precision + recall) > 0,
     )
+
+
+def build_train_phase2_command(
+    options: Mapping[str, object],
+    extra: Sequence[object] = (),
+) -> list[str]:
+    """Assemble argv for a ``python -m autoshotv2.train_phase2`` subprocess.
+
+    ``options`` maps ``--flag`` names to values, emitted in insertion order;
+    ``extra`` holds raw trailing tokens (boolean flags or flag/value runs).
+    """
+    cmd = [sys.executable, "-m", "autoshotv2.train_phase2"]
+    for key, value in options.items():
+        cmd.extend([key, str(value)])
+    cmd.extend(str(token) for token in extra)
+    return cmd
 
 
 def set_global_seeds(seed: int) -> None:

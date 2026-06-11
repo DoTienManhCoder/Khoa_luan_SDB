@@ -1,10 +1,48 @@
 import json
 import pickle
+import sys
+from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
 
 import scripts.run_journal_study as study
+
+
+def test_training_command_uses_frozen_protocol_arguments(tmp_path):
+    args = SimpleNamespace(
+        meta=tmp_path / "meta.pickle",
+        base_ckpt=tmp_path / "base.pth",
+        epochs=3,
+        batch_size=256,
+        data_seed=42,
+        max_train_videos=400,
+        max_val_videos=50,
+        force=False,
+    )
+    run_dir = tmp_path / "seed_43"
+    command = study.training_command(
+        args, 43, tmp_path / "shared", run_dir, run_dir / "checkpoint.pth"
+    )
+
+    assert command[:3] == [sys.executable, "-m", "autoshotv2.train_phase2"]
+    pairs = dict(zip(command[3:-1:2], command[4::2]))
+    # Frozen training configuration — must never vary across seeds.
+    assert pairs["--loss"] == "bce"
+    assert pairs["--manyhot-weight"] == "0"
+    assert pairs["--boundary-window"] == "0"
+    assert pairs["--temperature-mode"] == "off"
+    assert pairs["--sigma"] == "0"
+    assert pairs["--seed"] == "43"
+    assert pairs["--data-seed"] == "42"
+    assert pairs["--sample-cache"] == str(tmp_path / "shared" / "sample_cache.pkl")
+    assert command[-1] == "--skip-test-eval"
+
+    args.force = True
+    forced = study.training_command(
+        args, 43, tmp_path / "shared", run_dir, run_dir / "checkpoint.pth"
+    )
+    assert forced[-2:] == ["--no-resume", "--no-eval-cache"]
 
 
 def test_materialize_ground_truth_from_canonical_sources(tmp_path, monkeypatch):

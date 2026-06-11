@@ -62,6 +62,30 @@ def test_scores_from_cache_logits_and_probabilities_kinds():
         scores_from_cache(probs, temperature=1.0, sigma=0.0, input_kind="bogus")
 
 
+def test_build_train_phase2_command_preserves_order_and_stringifies():
+    import sys
+
+    from autoshotv2.common import build_train_phase2_command
+
+    cmd = build_train_phase2_command(
+        {"--epochs": 3, "--sigma": 2.0},
+        ["--use-ema", "--ema-decay", 0.999, "--no-resume"],
+    )
+    assert cmd == [
+        sys.executable,
+        "-m",
+        "autoshotv2.train_phase2",
+        "--epochs",
+        "3",
+        "--sigma",
+        "2.0",
+        "--use-ema",
+        "--ema-decay",
+        "0.999",
+        "--no-resume",
+    ]
+
+
 def test_set_global_seeds_makes_numpy_deterministic():
     set_global_seeds(123)
     first = np.random.rand(3)
