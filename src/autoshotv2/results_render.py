@@ -304,7 +304,6 @@ def render_paper_tex_macros(manifest: dict[str, Any]) -> str:
         # anchors every CI/calibration/seed analysis).
         "PaperDeployTemperature": f"{deployment['temperature']:.4f}",
         "PaperBFourTemperature": f"{protocol['temperature']:.4f}",
-        "PaperTemperature": f"{protocol['temperature']:.4f}",
         "PaperGaussianSigma": f"{protocol['sigma']:.1f}",
         "PaperDeployThreshold": f"{protocol['threshold']:.2f}",
         "PaperMatchTolerance": str(protocol["matching_tolerance_frames"]),
@@ -326,23 +325,11 @@ def render_paper_tex_macros(manifest: dict[str, Any]) -> str:
         "PaperBFourVsAOneShotPP": f"{(b4['shot']['f1'] - a1['shot']['f1']) * 100:.2f}",
         "PaperBFourVsAOneBBCPP": f"{(b4['bbc']['f1'] - a1['bbc']['f1']) * 100:.2f}",
         "PaperBFourVsAOneClipPP": f"{(b4['clipshots']['f1'] - a1['clipshots']['f1']) * 100:.2f}",
-        "PaperASVTwoShotFOne": f4(b4["shot"]["f1"]),
-        "PaperASVTwoBBCFOne": f4(b4["bbc"]["f1"]),
-        "PaperASVTwoClipFOne": f4(b4["clipshots"]["f1"]),
-        "PaperASVTwoClipDeployFOne": f4(b4["clipshots"]["f1"]),
-        "PaperASVTwoClipBestFOne": f4(b4["clipshots"]["f1"]),
-        "PaperASVTwoShotPrecision": f4(b4["shot"]["precision"]),
-        "PaperASVTwoShotRecall": f4(b4["shot"]["recall"]),
         "PaperAOneShotFOne": f4(a1["shot"]["f1"]),
         "PaperAOneBBCFOne": f4(a1["bbc"]["f1"]),
         "PaperAOneClipFOne": f4(a1["clipshots"]["f1"]),
         "PaperAutoShotShotFOne": f4(autoshot["shot"]),
         "PaperTransNetShotFOne": f4(transnet["shot"]),
-        "PaperASVTwoVsAOneShotPP": f"{(b4['shot']['f1'] - a1['shot']['f1']) * 100:.2f}",
-        "PaperASVTwoVsAOneBBCPP": f"{(b4['bbc']['f1'] - a1['bbc']['f1']) * 100:.2f}",
-        "PaperASVTwoVsAOneClipPP": f"{(b4['clipshots']['f1'] - a1['clipshots']['f1']) * 100:.2f}",
-        "PaperASVTwoVsAutoShotPP": f"{(b4['shot']['f1'] - autoshot['shot']) * 100:.2f}",
-        "PaperASVTwoVsTransNetPP": f"{(b4['shot']['f1'] - transnet['shot']) * 100:.2f}",
     }
     seed_study = manifest["supplemental_results"]["journal_seed_study"]
     definitions["PaperSeedCount"] = str(len(seed_study["training_seeds"]))
@@ -412,31 +399,6 @@ def render_paper_tex_tables(manifest: dict[str, Any]) -> str:
             f"{paper_metric(metrics['clipshots']['f1'], selected)} \\\\"
         )
     lines += [r"\newcommand{\PaperProtocolMatchedRows}{%", *protocol_rows, "}", ""]
-
-    reported_rows = []
-    for identifier, label in (
-        ("autoshot_reported", "AutoShot (reported)"),
-        ("transnetv2_reported", "TransNetV2 (reported)"),
-    ):
-        metrics = comparisons[identifier]["metrics"]
-        reported_rows.append(
-            f"{label} & {paper_metric(metrics['shot'])} & "
-            f"{paper_metric(metrics['bbc'])} & {paper_metric(metrics['clipshots'])} \\\\"
-        )
-    lines += [r"\newcommand{\PaperReportedBaselineRows}{%", *reported_rows, "}", ""]
-
-    archived_rows = []
-    for identifier, label in (
-        ("phase2_deploy_threshold", "Deploy checkpoint, fixed threshold"),
-        ("phase2_best_sweep", "Deploy checkpoint, best sweep"),
-    ):
-        metrics = experiments[identifier]["metrics"]
-        archived_rows.append(
-            f"{label} & {paper_metric(metrics['shot']['f1'])} & "
-            f"{paper_metric(metrics['bbc']['f1'])} & "
-            f"{paper_metric(metrics['clipshots']['f1'])} \\\\"
-        )
-    lines += [r"\newcommand{\PaperArchivedResultRows}{%", *archived_rows, "}", ""]
 
     deploy_detail_rows = []
     for dataset in DATASET_ORDER:
