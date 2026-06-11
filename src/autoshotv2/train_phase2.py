@@ -17,6 +17,7 @@ from scipy.ndimage import gaussian_filter1d
 from scipy.optimize import minimize_scalar
 from torch.utils.data import DataLoader, Dataset
 
+from autoshotv2.common import f1_pr, set_global_seeds, sigmoid_np
 from autoshotv2.model.linear import Linear_
 from autoshotv2.utils import (
     evaluate_scenes,
@@ -849,10 +850,6 @@ def load_or_run_logits(
     return logits
 
 
-def sigmoid_np(x: np.ndarray) -> np.ndarray:
-    return 1.0 / (1.0 + np.exp(-x))
-
-
 def logits_to_pred_dict(logits: dict[str, np.ndarray], temperature: float, sigma: float) -> dict[str, np.ndarray]:
     pred: dict[str, np.ndarray] = {}
     for key, arr in logits.items():
@@ -895,9 +892,7 @@ def evaluate_fixed(pred: dict[str, np.ndarray], gt: dict[str, np.ndarray], thres
         tp += tp_
         fp += fp_
         fn += fn_
-    precision = tp / (tp + fp) if tp + fp > 0 else 0.0
-    recall = tp / (tp + fn) if tp + fn > 0 else 0.0
-    f1 = 2.0 * precision * recall / (precision + recall) if precision + recall > 0 else 0.0
+    f1, precision, recall = f1_pr(tp, fp, fn)
     return {
         "f1": float(f1),
         "precision": float(precision),
@@ -986,9 +981,7 @@ def main() -> None:
     args = parser.parse_args()
     args._deadline = time.monotonic() + args.stop_after_minutes * 60.0 if args.stop_after_minutes > 0 else None
 
-    random.seed(args.seed)
-    np.random.seed(args.seed)
-    torch.manual_seed(args.seed)
+    set_global_seeds(args.seed)
     print(f"Device: {device}")
 
     meta = load_metadata(args.meta)

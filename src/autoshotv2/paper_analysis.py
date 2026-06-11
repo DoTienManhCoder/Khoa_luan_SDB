@@ -23,7 +23,13 @@ import numpy as np
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from autoshotv2.ablation import load_logits, scores_from_cache
+from autoshotv2.common import (
+    classification_metrics,
+    f1_from_counts,
+    load_logits,
+    normalize_key,
+    scores_from_cache,
+)
 from autoshotv2.eval import evaluate_scenes, predictions_to_scenes
 from autoshotv2.train_phase2 import transitions_to_scenes
 from autoshotv2.utils import scenes2zero_one_representation
@@ -56,24 +62,6 @@ SHOT_GT_URL = (
     "https://raw.githubusercontent.com/wentaozhu/AutoShot/main/"
     "gt_scenes_dict_baseline_v2.pickle"
 )
-
-
-def normalize_key(value: str) -> str:
-    return Path(str(value).split(":", 1)[-1]).stem
-
-
-def classification_metrics(tp: int, fp: int, fn: int) -> dict[str, float | int]:
-    precision = tp / (tp + fp) if tp + fp else 0.0
-    recall = tp / (tp + fn) if tp + fn else 0.0
-    f1 = 2.0 * precision * recall / (precision + recall) if precision + recall else 0.0
-    return {
-        "f1": float(f1),
-        "precision": float(precision),
-        "recall": float(recall),
-        "tp": int(tp),
-        "fp": int(fp),
-        "fn": int(fn),
-    }
 
 
 def bootstrap_confidence_intervals(
@@ -142,19 +130,6 @@ def paired_bootstrap_delta(
         raise ValueError("paired stats must have equal shape (n_videos, 3)")
     if len(baseline) == 0:
         raise ValueError("paired stats must be non-empty")
-
-    def f1_from_counts(values: np.ndarray) -> np.ndarray:
-        tp = values[..., 0].astype(np.float64)
-        fp = values[..., 1].astype(np.float64)
-        fn = values[..., 2].astype(np.float64)
-        precision = np.divide(tp, tp + fp, out=np.zeros_like(tp), where=(tp + fp) > 0)
-        recall = np.divide(tp, tp + fn, out=np.zeros_like(tp), where=(tp + fn) > 0)
-        return np.divide(
-            2.0 * precision * recall,
-            precision + recall,
-            out=np.zeros_like(precision),
-            where=(precision + recall) > 0,
-        )
 
     point = float(
         f1_from_counts(method.sum(axis=0))

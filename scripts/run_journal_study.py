@@ -12,7 +12,7 @@ from typing import Any
 
 import numpy as np
 
-from autoshotv2.eval import load_logits
+from autoshotv2.common import load_logits, normalize_key
 from autoshotv2.journal_protocol import load_frozen_protocol
 from autoshotv2.train_phase2 import transitions_to_scenes
 
@@ -45,10 +45,6 @@ def dataset_resources(args: argparse.Namespace) -> dict[str, tuple[Path, Path]]:
         "bbc": (args.bbc_gt, args.bbc_videos),
         "clipshots": (args.clipshots_gt, args.clipshots_videos),
     }
-
-
-def normalize_key(value: str) -> str:
-    return Path(str(value).split(":", 1)[-1]).stem
 
 
 def materialize_ground_truth(args: argparse.Namespace) -> None:

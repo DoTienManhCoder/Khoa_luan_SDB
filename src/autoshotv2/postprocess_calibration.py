@@ -38,7 +38,7 @@ from typing import Any
 import numpy as np
 
 from autoshotv2.eval import DEFAULT_THRESHOLDS, eval_at_threshold, evaluate_scenes, predictions_to_scenes
-from autoshotv2.ablation import load_logits, scores_from_cache
+from autoshotv2.common import f1_pr, load_logits, scores_from_cache
 
 
 REPO_DIR = Path(__file__).resolve().parents[2]  # src/autoshotv2/X.py -> repo root
@@ -129,13 +129,6 @@ def load_model_dataset(model: str, dataset: str) -> tuple[dict[str, np.ndarray],
 
 def make_pred(scores: dict[str, np.ndarray], input_kind: str, temperature: float, sigma: float) -> dict[str, np.ndarray]:
     return scores_from_cache(scores, temperature=temperature, sigma=sigma, input_kind=input_kind)
-
-
-def f1_pr(tp: int, fp: int, fn: int) -> tuple[float, float, float]:
-    precision = tp / (tp + fp) if tp + fp else 0.0
-    recall = tp / (tp + fn) if tp + fn else 0.0
-    f1 = 2 * precision * recall / (precision + recall) if precision + recall else 0.0
-    return f1, precision, recall
 
 
 def per_video_stats(

@@ -107,6 +107,8 @@ def evaluate_scenes(gt_scenes, pred_scenes, return_mistakes=False, n_frames_miss
 
     p = tp / (tp + fp) if tp + fp != 0 else 0
     r = tp / (tp + fn) if tp + fn != 0 else 0
+    # NOT common.f1_pr: (p * r * 2) has a different float operation order than
+    # 2 * p * r and can differ in the last bit; historical numbers are pinned to it.
     f1 = (p * r * 2) / (p + r) if p + r != 0 else 0
 
     if return_mistakes:

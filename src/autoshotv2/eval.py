@@ -8,6 +8,9 @@ import torch
 
 from autoshotv2 import runtime
 
+# Re-exported for backward compatibility; canonical home is autoshotv2.common.
+from autoshotv2.common import clean_key, load_logits, sigmoid_np
+
 
 DEFAULT_THRESHOLDS = np.array(
     [
@@ -120,18 +123,6 @@ def run_video_inference(checkpoint_path: Path, videos_dir: Path, out_logits_path
     return logits
 
 
-def load_logits(logits_path: Path) -> dict:
-    with logits_path.open("rb") as f:
-        payload = pickle.load(f)
-    return payload["logits"] if isinstance(payload, dict) and "logits" in payload else payload
-
-
-def clean_key(key: str) -> str:
-    return str(key).split(":", 1)[-1]
-
-
-def sigmoid_np(x: np.ndarray) -> np.ndarray:
-    return 1.0 / (1.0 + np.exp(-x))
 
 
 def logits_to_predictions(logits: dict, temperature: float, sigma: float) -> dict:

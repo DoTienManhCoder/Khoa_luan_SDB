@@ -11,7 +11,7 @@ from typing import Any
 
 import numpy as np
 
-from autoshotv2.ablation import load_logits
+from autoshotv2.common import load_logits
 from autoshotv2.train_phase2 import (
     evaluate_fixed,
     find_temperature,

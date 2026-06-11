@@ -23,7 +23,16 @@ from autoshotv2.train_phase2 import (
     select_training_keys,
     sha256_file,
 )
-from autoshotv2.eval import DEFAULT_THRESHOLDS, eval_at_threshold, sigmoid_np
+# clean_key/load_logits/scores_from_cache are re-exported here for backward
+# compatibility; canonical home is autoshotv2.common.
+from autoshotv2.common import (
+    clean_key,
+    load_logits,
+    load_pickle_payload,
+    scores_from_cache,
+    sigmoid_np,
+)
+from autoshotv2.eval import DEFAULT_THRESHOLDS, eval_at_threshold
 
 
 DATASETS = ("shot", "clipshots", "bbc")
@@ -207,20 +216,6 @@ def run_command(cmd: list[str], cwd: Path, continue_on_error: bool) -> tuple[boo
     return True, ""
 
 
-def load_pickle_payload(path: Path) -> Any:
-    with path.open("rb") as f:
-        return pickle.load(f)
-
-
-def load_logits(path: Path) -> dict[str, np.ndarray]:
-    payload = load_pickle_payload(path)
-    return payload["logits"] if isinstance(payload, dict) and "logits" in payload else payload
-
-
-def clean_key(key: str) -> str:
-    return str(key).split(":", 1)[-1]
-
-
 def logits_overlap_gt(logits_path: Path, gt_path: Path) -> bool:
     try:
         logits = load_logits(logits_path)
@@ -278,28 +273,6 @@ def prepare_subset_gt(gt_path: Path, out_path: Path, max_videos: int) -> Path:
     with out_path.open("wb") as f:
         pickle.dump(subset, f, protocol=pickle.HIGHEST_PROTOCOL)
     return out_path
-
-
-def scores_from_cache(scores: dict[str, np.ndarray], temperature: float, sigma: float, input_kind: str) -> dict[str, np.ndarray]:
-    from scipy.ndimage import gaussian_filter1d
-
-    pred: dict[str, np.ndarray] = {}
-    for key, arr in scores.items():
-        value = np.asarray(arr, dtype=np.float32).reshape(-1)
-        if input_kind == "logits":
-            value = sigmoid_np(value / temperature)
-        elif input_kind == "probabilities":
-            if temperature != 1.0:
-                eps = np.finfo(np.float32).eps
-                clipped = np.clip(value, eps, 1.0 - eps)
-                logits = np.log(clipped / (1.0 - clipped))
-                value = sigmoid_np(logits / temperature)
-        else:
-            raise ValueError(f"Unsupported input kind: {input_kind}")
-        if sigma > 0:
-            value = gaussian_filter1d(value, sigma=sigma)
-        pred[clean_key(key)] = value[:, np.newaxis].astype(np.float32)
-    return pred
 
 
 def write_json(path: Path, payload: Any) -> None:
