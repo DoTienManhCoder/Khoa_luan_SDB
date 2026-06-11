@@ -1,6 +1,8 @@
 import numpy as np
+import pytest
 
 from autoshotv2.paper_analysis import (
+    benchmark_postprocess,
     bootstrap_confidence_intervals,
     calibration_metrics,
     match_transition_intervals,
@@ -8,6 +10,13 @@ from autoshotv2.paper_analysis import (
     paired_bootstrap_delta,
     transition_kind_mask,
 )
+
+
+def test_benchmark_postprocess_rejects_empty_logits():
+    with pytest.raises(ValueError, match="No logits frames"):
+        benchmark_postprocess({})
+    with pytest.raises(ValueError, match="No logits frames"):
+        benchmark_postprocess({"shot": {}})
 
 
 def test_bootstrap_confidence_intervals_are_deterministic():

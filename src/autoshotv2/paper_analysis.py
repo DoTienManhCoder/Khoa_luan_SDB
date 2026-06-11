@@ -567,6 +567,11 @@ def reliability_figure(
 
 def benchmark_postprocess(logits_by_dataset: dict[str, dict[str, np.ndarray]], rounds: int = 3) -> dict[str, Any]:
     frames = sum(len(value) for logits in logits_by_dataset.values() for value in logits.values())
+    if frames == 0:
+        raise ValueError(
+            "No logits frames found in eval caches; cannot benchmark post-processing "
+            "(empty or corrupt logits pickle?)"
+        )
     timings = []
     for _ in range(rounds):
         start = time.perf_counter()
