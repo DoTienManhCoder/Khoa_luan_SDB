@@ -12,7 +12,7 @@ ruff check --fix .                    # lint (run before pushing; CI enforces it
 python scripts/sync_experimental_results.py --check   # verify generated reports/TeX are current (7x OK)
 ```
 
-CLI entry points: `autoshotv2-train`, `autoshotv2-eval`, `autoshotv2-calibrate`, `autoshotv2-ablation`, `autoshotv2-train-ema`, `autoshotv2-ema-report`. Journal study: `scripts/run_journal_study.py`. Web app: `apps/web` via docker-compose (see `docs/WEB.md`).
+CLI entry points: `autoshotv2-train`, `autoshotv2-eval`, `autoshotv2-calibrate`, `autoshotv2-ablation`. Journal study: `scripts/run_journal_study.py`. Web app: `apps/web` via docker-compose (see `docs/WEB.md`).
 
 ## Layout
 
