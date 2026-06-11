@@ -1,22 +1,31 @@
 \begin{abstract}
-Shot boundary detection (SBD) is a threshold-sensitive preprocessing step
-whose reported accuracy depends on model training, score calibration, temporal
-filtering, and operating-point selection. We present a reproducibility-focused
-study of frozen-feature adaptation for AutoShot. The study freezes the searched
-AutoShot representation, trains a binary cross-entropy head on cached
-4864-dimensional features, and selects temperature scaling, Gaussian smoothing,
-and a decision threshold using five-fold validation only. The selected
-single-seed configuration achieves F1 scores of \PaperASVTwoShotFOne{} on SHOT,
-\PaperASVTwoBBCFOne{} on BBC, and \PaperASVTwoClipFOne{} on ClipShots.
-Paired video bootstrap estimates improvements over the unsmoothed BCE control
-of 0.0162 on SHOT and 0.0457 on ClipShots, while the BBC interval includes zero.
-Temperature scaling reduces validation NLL from 0.013006 to 0.009591 and
-equal-width ECE from 0.007149 to 0.002214. However, class-balanced ECE remains
-0.070405, showing that aggregate frame-level calibration metrics are optimistic
-under severe boundary sparsity. Controlled ablations further show that Gaussian
-smoothing changes boundary accuracy, whereas temperature scaling primarily
-improves probability quality. A three-seed replication of the end-to-end
-pipeline bounds training-seed F1 variability below 0.005 on every dataset.
-We release validation-selection manifests, per-video statistics, analysis
-code, and checksum-oriented artifact tooling.
+Shot boundary detection (SBD) is a fundamental preprocessing step for video
+indexing, retrieval, summarization, and automated editing. Modern short-video
+platforms create a difficult operating regime: videos are brief, shots are
+extremely short, transitions are visually complex, and boundary frames are
+rare compared with non-boundary frames. This paper presents AutoShotV2, a
+lightweight improvement over the AutoShot architecture for short-video SBD.
+Instead of re-searching or retraining the full backbone, AutoShotV2 freezes
+the AutoShot feature extractor and trains a new two-branch classification
+head over 4864-dimensional cached features, exploring complementary one-hot
+and boundary-aware many-hot supervision. At inference time, the primary
+boundary logits are calibrated by temperature scaling and stabilized by
+one-dimensional Gaussian smoothing before thresholding. With a fixed
+deployment configuration ($T^{*}=\PaperDeployTemperature$), AutoShotV2
+reaches an F1-score of \PaperDeployShotFOne{} on the SHOT test set of 200
+short videos, improving over the reproduced AutoShot baseline by
+\PaperDeployVsAutoShotPP{} F1 points and over the reported TransNetV2
+baseline by \PaperDeployVsTransNetPP{} points, and transfers to BBC
+documentary footage (\PaperDeployBBCFOne) while remaining limited on
+open-world ClipShots (\PaperDeployClipFOne). A controlled replication under
+a frozen validation-only protocol shows that the gain comes from calibrated
+post-processing rather than the training-loss alternatives, with paired
+bootstrap intervals supporting improvements on SHOT and ClipShots but not
+BBC. Temperature scaling reduces validation NLL from 0.013006 to 0.009591
+and equal-width ECE from 0.007149 to 0.002214, while class-balanced ECE
+remains 0.070405, showing that aggregate frame-level calibration metrics are
+optimistic under severe boundary sparsity. A three-seed replication bounds
+training-seed F1 variability below 0.005 on every dataset. We release
+validation-selection manifests, per-video statistics, analysis code, and
+checksum-oriented artifact tooling.
 \end{abstract}

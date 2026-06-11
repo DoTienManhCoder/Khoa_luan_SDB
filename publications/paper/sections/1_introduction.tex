@@ -1,45 +1,80 @@
 \section{Introduction}
 
-Shot boundary detection (SBD) partitions a video into temporally coherent shots by identifying frames where the camera view, scene content, or editing state changes. It is a common first step for video indexing, retrieval, summarization, and automated editing \cite{seridi2020survey,kar2024review}. Classical methods based on color histograms, edge changes, or motion cues are efficient, but they are fragile under illumination changes, fast camera motion, flashes, and modern editing effects.
+Effectively parsing video content is a fundamental requirement for many
+downstream applications such as video indexing, content retrieval,
+summarization, and automated editing. Within this pipeline, shot boundary
+detection (SBD) serves as a critical preliminary step: it partitions a video
+into temporally coherent shots by identifying the exact frames where camera
+views, scene contents, or editing states transition
+\cite{seridi2020survey,kar2024review}. Classical methods based on
+hand-crafted cues such as color histograms and motion differences are
+efficient but fragile under fast camera motion, flashes, and modern editing
+styles \cite{abdulhussain2018review}.
 
-Deep SBD models such as TransNet and TransNetV2 \cite{soucek2019transnet,soucek2020transnetv2} learn frame-level transition patterns directly from short frame windows. AutoShot \cite{zhu2023autoshot} further targets short-video SBD by searching a specialized 3-D convolutional backbone for the SHOT dataset. This improves performance on short-form videos, but the neural architecture search (NAS) and subsequent retraining pipeline are costly to repeat. At the same time, short-video SBD remains difficult because boundaries are sparse, shots are short, and editing effects produce many hard negatives.
+Deep architectures such as TransNet and TransNetV2
+\cite{soucek2019transnet,soucek2020transnetv2} learn spatial-temporal
+representations directly from frame sequences and have significantly
+advanced the state-of-the-art. Concurrently, the rise of short-video
+platforms (e.g., TikTok, YouTube Shorts) has introduced a new, challenging
+operating regime: brief videos, dense editing, and heavy special effects. To
+address it, AutoShot \cite{zhu2023autoshot} leverages neural architecture
+search (NAS) to find an optimal 3-D convolutional backbone, demonstrating
+strong performance on the newly introduced SHOT dataset. Further improving
+these models, however, encounters a severe bottleneck: the NAS pipeline
+requires immense computational overhead for supernet training and
+architecture evaluation. Moreover, short-video SBD suffers from extreme
+class imbalance --- boundary frames are exceptionally rare --- and complex
+visual effects that act as hard negatives.
 
-This paper asks two practical questions: how far can a searched AutoShot
-backbone be adapted without repeating NAS, and how much of the measured gain
-comes from probability calibration versus temporal filtering? We treat the
-problem as a reproducibility study rather than as a claim of a new backbone.
-The system reuses the 4864-dimensional AutoShot representation, trains only a
-binary classification head, and processes its frame scores with temperature
-scaling \cite{guo2017calibration} and Gaussian smoothing.
+Following the strategy of separating representation learning from
+task-specific adaptation, we study a more efficient refinement path for
+short-video SBD. Instead of re-running the expensive NAS process, we freeze
+the searched AutoShot backbone and improve only the decision stage, a method
+we term AutoShotV2. Its core component is a dual-branch classification head
+applied over the frozen 4864-dimensional cached features. To handle the
+class imbalance, we explore Focal Loss \cite{lin2017focal} on the primary
+branch and a boundary-aware many-hot supervision strategy on the auxiliary
+branch, providing denser temporal gradients without compromising the precise
+one-hot localization of the primary branch. Finally, because SBD decisions
+rely directly on thresholding model scores, we introduce a calibrated
+post-processing stage: temperature scaling \cite{guo2017calibration}
+adjusts the numerical scale of the predictions without altering their
+ranking, and a one-dimensional Gaussian filter smooths out isolated
+false-positive peaks caused by sudden flashes or camera shakes.
 
-The operating point is selected without test feedback. We construct five
-validation folds stratified by source dataset, fit temperature on the four
-training folds, and choose smoothing and threshold by mean macro-F1 across
-validation sources. This procedure independently recovers
-$T=\PaperTemperature$, $\sigma=\PaperGaussianSigma$, and
-$\theta=\PaperDeployThreshold$. Test results are computed only after this
-manifest is frozen.
+With the fixed deployment configuration, AutoShotV2 achieves an F1-score of
+\PaperDeployShotFOne{} on the SHOT test set, improving over the reproduced
+AutoShot baseline and the reported TransNetV2 baseline by
+\PaperDeployVsAutoShotPP{} and \PaperDeployVsTransNetPP{} F1 points,
+respectively. A controlled replication under a frozen, validation-only
+five-fold protocol disentangles the sources of this gain: the training-loss
+alternatives change F1 only marginally, whereas calibrated post-processing
+raises SHOT F1 from \PaperAOneShotFOne{} to \PaperBFourShotFOne{} and
+ClipShots F1 from \PaperAOneClipFOne{} to \PaperBFourClipFOne{} over the BCE
+control, with paired bootstrap intervals confirming the deltas on SHOT and
+ClipShots but not BBC.
 
-The central empirical result is that the simple BCE one-hot control is
-sufficient at training time. Focal Loss \cite{lin2017focal}, many-hot
-supervision, and their combination change F1 only marginally. The selected
-post-processing configuration raises SHOT F1 from \PaperAOneShotFOne{} to
-\PaperASVTwoShotFOne{} and ClipShots F1 from \PaperAOneClipFOne{} to
-\PaperASVTwoClipFOne{}. BBC remains effectively unchanged. Paired bootstrap
-analysis confirms positive boundary-level deltas on SHOT and ClipShots but not
-on BBC.
-
-The main contributions are:
+In summary, our main contributions are:
 \begin{itemize}
+\item We propose AutoShotV2, an efficient SBD pipeline that improves
+short-video boundary detection without the computational burden of
+retraining the NAS-searched backbone, reaching \PaperDeployShotFOne{} F1 on
+SHOT with a fixed deployment configuration.
+\item We design a two-branch classification head and systematically explore
+Focal Loss and boundary-aware many-hot supervision as a training design
+space, showing through a controlled ablation that calibrated post-processing
+--- not the more complex losses --- drives the measured gain.
 \item We define a validation-only, source-stratified selection protocol that
-freezes temperature, smoothing, and threshold before test evaluation.
-\item We separate probability calibration from temporal filtering and show
-with protocol-matched ablations that Gaussian smoothing drives the
-boundary-level gain.
-\item We report paired video bootstrap intervals and calibration diagnostics
-that include adaptive and class-balanced ECE, exposing the effect of sparse
-positive frames.
-\item We provide strict cache identities, exact split/run manifests, a
-three-seed runner, and checksum-based artifact packaging. The currently
-reported checkpoint is explicitly identified as single-seed.
+freezes temperature, smoothing, and threshold before any test evaluation,
+and quantify uncertainty with paired video bootstrap intervals and
+calibration diagnostics including adaptive and class-balanced ECE.
+\item We provide extensive experiments on SHOT, BBC, and ClipShots with
+strict cache identities, exact split/run manifests, a three-seed robustness
+study, and checksum-based artifact packaging.
 \end{itemize}
+
+The paper reports results on two tracks by design: the deployed checkpoint
+supplies the headline numbers and is preserved as tracked, checksummed
+result files, while a controlled replication with full logit caches anchors
+every confidence interval, calibration diagnostic, and ablation
+(Section~\ref{sec:tracks}).

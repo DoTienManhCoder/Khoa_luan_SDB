@@ -1,18 +1,30 @@
 \section{Conclusion}
 
-We presented a reproducibility-focused study of calibration and frozen-feature
-adaptation for AutoShot. The selected configuration trains a BCE one-hot head
-on cached features and applies temperature scaling and Gaussian smoothing
-chosen by source-stratified, validation-only cross-validation. It reaches F1
-scores of \PaperASVTwoShotFOne{} on SHOT, \PaperASVTwoBBCFOne{} on BBC, and
-\PaperASVTwoClipFOne{} on ClipShots, with paired bootstrap intervals
-supporting gains on SHOT and ClipShots but not BBC, and a three-seed
-replication bounding training-seed F1 variability below 0.005 on every
-dataset.
+We presented AutoShotV2, a compact refinement framework for short-video shot
+boundary detection. By freezing the NAS-searched AutoShot backbone and
+retraining a calibrated two-branch classification head, the method addresses
+the extreme class imbalance characteristic of short videos without repeating
+the computationally expensive architecture search. Temperature scaling and
+Gaussian smoothing provide the calibrated decision pipeline used at
+deployment, reaching F1 scores of \PaperDeployShotFOne{} on SHOT,
+\PaperDeployBBCFOne{} on BBC, and \PaperDeployClipFOne{} on ClipShots with a
+single fixed configuration.
 
-The revised implementation records exact cache identities, split manifests,
-frozen selection decisions, and artifact checksums, so every reported number
-is regenerated and checked from tracked artifacts. Future work should reserve
-an independent calibration split, extend calibration to boundary-conditional
-estimates, and address cross-domain precision on ClipShots with
-domain-adaptive components on the frozen backbone.
+The controlled replication clarifies where the improvement comes from:
+Focal Loss and many-hot supervision leave the BCE control statistically
+unchanged, whereas calibrated post-processing yields paired-bootstrap gains
+on SHOT and ClipShots; a three-seed study bounds training-seed F1
+variability below 0.005 on every dataset, and class-balanced calibration
+error shows why very small aggregate ECE values should not be read as
+uniformly calibrated boundary probabilities. Every reported number is
+regenerated and checked from tracked artifacts with exact cache identities
+and frozen selection manifests.
+
+Cross-domain analysis identifies the main open problem: on open-world
+ClipShots the dominant loss is precision, as visual effects and domain shift
+create false-positive peaks that survive smoothing. Future work should
+reserve an independent calibration split, extend calibration to
+boundary-conditional estimates, and explore domain-adaptive components ---
+lightweight adapters on the frozen backbone or per-domain post-processing
+selection --- together with multimodal cues such as audio for robustness
+where visual evidence alone is ambiguous.
