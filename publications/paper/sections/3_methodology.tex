@@ -1,5 +1,90 @@
-\section{Proposed AutoShotV2}
+\section{Methodology}
 \label{sec:method}
+
+This section formulates the shot boundary detection problem, reviews the
+TransNetV2 and AutoShot components that provide the frozen backbone, and
+presents the proposed AutoShotV2 pipeline built on top of it.
+
+\subsection{Problem Formulation}
+\label{sec:problem}
+
+Given a video represented as an ordered sequence of $T$ frames
+$\{x_t\}_{t=1}^{T}$, SBD predicts a binary sequence $\{b_t\}_{t=1}^{T}$,
+where $b_t{=}1$ denotes a shot boundary (an abrupt cut or a gradual
+transition) at frame $t$. A model outputs a boundary probability sequence
+$\{p_t\}_{t=1}^{T}$ with $p_t\in[0,1]$, and the final boundary set is
+obtained by thresholding:
+\begin{equation}
+    \hat b_t=\begin{cases}1, & p_t > \theta,\\ 0, & p_t \le \theta,\end{cases}
+    \label{eq:threshold}
+\end{equation}
+where $\theta$ is selected on validation data. Following standard practice,
+a predicted boundary counts as correct when it falls within
+\PaperMatchTolerance{} frames of a ground-truth boundary, and consecutive
+positive predictions are grouped into one transition.
+
+\subsection{Spatial-Temporal Factorized Convolution}
+
+Processing raw frame sequences with full 3-D convolutional kernels of size
+$k\times k\times k$ is expensive. The TransNetV2 family therefore factorizes
+each 3-D convolution into a 2-D spatial convolution ($1\times k\times k$,
+learning edges, textures, and color regions per frame) followed by a 1-D
+temporal convolution ($k\times 1\times 1$, capturing motion patterns along
+the temporal axis). With $C$ input/output channels and $k{=}3$, the
+parameter count drops from $27C^2$ to $9C^2+3C^2=12C^2$, a reduction of
+roughly 56\% that also imposes a useful inductive bias separating spatial
+content from temporal motion.
+
+\subsection{Dilated DDCNN Blocks}
+
+The backbone stacks Dilated Convolutional Neural Network (DDCNN) blocks.
+Each block splits its input features into four parallel temporal-convolution
+branches with exponentially increasing dilation rates $d\in\{1,2,4,8\}$,
+concatenates the branch outputs along the channel dimension, and applies
+batch normalization with ReLU activation. For temporal kernel size $K{=}3$,
+the cumulative receptive field after block $k$ grows as
+\begin{equation}
+    R_k = R_{k-1} + 2\,(K-1)\!\!\sum_{d\in\{1,2,4,8\}}\!\! d \;=\; R_{k-1} + 60,
+    \label{eq:receptive}
+\end{equation}
+with $R_0{=}1$. Six stacked blocks yield a theoretical receptive field of up
+to 361 frames; since inference uses sliding windows of 100 frames, the
+effective context is capped by the window but remains wide enough for long
+dissolves and fades.
+
+\subsection{Similarity Branch}
+
+A parallel similarity branch complements the convolutional features with two
+forms of visual consistency: (i) a 512-bin RGB histogram per frame, whose
+cosine distances between consecutive frames yield a 101-dimensional
+color-shift descriptor, and (ii) learned similarity, the cosine similarity
+between normalized deep features from intermediate convolutional layers.
+Both are fused through a fully connected layer with 128 units and ReLU
+activation, and the result is concatenated with the convolutional features
+before classification.
+
+\subsection{AutoShot Backbone Search}
+
+While TransNetV2 fixes a configuration of identical DDCNN blocks, AutoShot
+searches the backbone configuration for short-form video with neural
+architecture search~\cite{zhu2023autoshot,elsken2019nas,white2023_nas1000,ren2020_nas_survey}.
+The space covers four DDCNN block variants (differing in channel
+configuration and spatial feature sharing) across six layers plus a choice
+of zero to four Transformer layers~\cite{vaswani2017attention} at the
+seventh, about $83.9\times10^6$ candidate architectures in total. The search
+trains a single-path one-shot supernet~\cite{guo2020spos} explored with
+Bayesian optimization (differentiable alternatives such as
+DARTS~\cite{liu2019darts} were considered by the original authors), and the
+selected model is refined with knowledge distillation and weight grafting.
+The architecture found under the F1 criterion uses DDCNNV2 blocks of 4--12
+filters with shared spatial convolutions in layers 2--4 and no Transformer
+layer. Its penultimate stage exposes a 4864-dimensional feature vector,
+which we freeze and cache:
+\begin{equation}
+    h_t \in \mathbb{R}^{4864}.
+    \label{eq:features}
+\end{equation}
+All AutoShotV2 components operate on $h_t$ without updating the backbone.
 
 AutoShotV2 improves the decision stage of SBD: it trains a new
 classification head on the frozen features of Eq.~\eqref{eq:features} and
