@@ -1,158 +1,339 @@
 \section{Experiments}
 
-\subsection{Implementation and Downstream Tasks}
-\textbf{Datasets.} The primary evaluation set is SHOT \cite{zhu2023autoshot}. SHOT contains 853 complete short videos and 11,606 shot annotations, including 2,716 high-quality annotations in the 200-video test split. The dataset differs from traditional SBD benchmarks because the videos are short, vertically edited, fast-paced, and rich in visual effects. BBC Planet Earth and ClipShots are used to assess cross-domain behavior. BBC contains professional documentary footage with many smooth gradual transitions. ClipShots contains diverse open-world videos from YouTube and Weibo, with a longer average duration and many wild transition styles \cite{tang2018clipshots}. Table~\ref{tab:datasets} summarizes the datasets used in this paper.
+\subsection{Datasets and Training Setup}
 
-\begin{table*}[!t]
+We evaluate on the 200-video SHOT test split \cite{zhu2023autoshot}, all 11
+BBC Planet Earth videos \cite{baraldi2015shot}, and the 500-video ClipShots
+test split \cite{tang2018clipshots}. SHOT is the primary short-video
+benchmark; BBC tests long documentary footage with many smooth gradual
+transitions; ClipShots tests open-world transfer. Table~\ref{tab:datasets}
+summarizes their characteristics.
+
+\begin{table}[!t]
 \caption{Dataset Characteristics Used for SBD Evaluation}
 \label{tab:datasets}
 \centering
-\small
-\renewcommand{\arraystretch}{1.15}
-\begin{tabularx}{\textwidth}{ZYYY}
+\scriptsize
+\renewcommand{\arraystretch}{1.08}
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{L{0.95in}C{0.78in}C{0.85in}C{0.62in}}
 \toprule
 \textbf{Property} & \textbf{BBC} & \textbf{ClipShots} & \textbf{SHOT} \\
 \midrule
-Content type & Documentary & Open-world online video & Short video \\
-Total dataset videos & 11 & 4039 & 853 \\
+Content type & Documentary & Open-world video & Short video \\
+Total videos & 11 & 4,039 & 853 \\
 Evaluation videos & 11 & 500 & 200 \\
-Average video length & 2945 s & 237 s & 39.5 s \\
-Average shot length & 6.57 s & 15.34 s & 2.59 s \\
-Hard cuts & Many & 128000+ & 8890 \\
-Gradual transitions & Many & 38000+ & 2716 \\
-Main challenge & Gradual transitions & Diverse effects & Fast editing pace \\
+Avg. video length & 2,945 s & 237 s & 39.5 s \\
+Avg. shot length & 6.57 s & 15.34 s & 2.59 s \\
+Hard cuts & Many & 128,000+ & 8,890 \\
+Gradual transitions & Many & 38,000+ & 2,716 \\
+Main challenge & Gradual trans. & Diverse effects & Fast editing \\
 \bottomrule
-\end{tabularx}
-\end{table*}
+\end{tabular}
+\end{table}
 
-\textbf{Metrics and implementation details.} Performance is measured by precision, recall, and F1-score. F1-score is the main selection criterion because SBD involves a direct trade-off between false alarms and missed transitions. AutoShotV2 trains only the classification head using Adam optimizer with a learning rate of $10^{-5}$, weight decay of $10^{-4}$, and frame-level batch size of 512. Training runs for 20 epochs with a 4-epoch linear warm-up followed by cosine annealing \cite{loshchilov2017sgdr}. The optimal threshold and temperature are calibrated using the validation set. Table~\ref{tab:hyperparams} details the selected hyperparameters.
+AutoShotV2 trains only the classification head with Adam at a constant
+learning rate; Table~\ref{tab:hyperparams} lists the hyperparameters and how
+each was selected. Performance is measured by precision, recall, and F1,
+micro-averaged from transition-level TP/FP/FN counts with a matching
+tolerance of $\pm\PaperMatchTolerance$ frames.
 
 \begin{table}[!t]
 \caption{AutoShotV2 Hyperparameters}
 \label{tab:hyperparams}
 \centering
 \small
-\renewcommand{\arraystretch}{1.12}
-\resizebox{\columnwidth}{!}{%
-\begin{tabular}{L{1.25in}C{0.75in}L{1.15in}}
+\renewcommand{\arraystretch}{1.08}
+\begin{tabular}{L{1.25in}C{0.7in}L{0.85in}}
 \toprule
 \textbf{Component} & \textbf{Value} & \textbf{Selection} \\
 \midrule
 Focal Loss $\gamma$ & 1.0 & Grid search \\
 Focal Loss $\alpha$ & 0.5 & Grid search \\
-Learning rate & $10^{-5}$ & Grid search \\
-Weight decay & $10^{-4}$ & Adam \\
+Learning rate & $10^{-5}$ & Adam, constant \\
+Weight decay & $10^{-4}$ & Fixed \\
 Batch size & 512 & Frame-level \\
 Maximum epochs & 20 & Fixed budget \\
-Warm-up & 4 epochs & Linear \\
+Dropout & 0.5 & Fixed \\
 Many-hot weight & 0.3 & Validation \\
-Gaussian $\sigma$ & \PaperGaussianSigma & Validation \\
-Temperature $T^*$ & \PaperTemperature & Validation BCE \\
+Gaussian $\sigma$ & \PaperGaussianSigma{} & Validation \\
+Deploy temperature $T^{*}$ & \PaperDeployTemperature{} & Validation BCE \\
 \bottomrule
 \end{tabular}
-}
 \end{table}
 
-\subsection{Main Results}
-\textbf{Overall performance.} Table~\ref{tab:main_results} reports F1-scores across SHOT, BBC, and ClipShots. With the fixed deployment configuration ($T=\PaperTemperature$, $\sigma=\PaperGaussianSigma$, and $\theta=\PaperDeployThreshold$), AutoShotV2 reaches \PaperASVTwoShotFOne{} on SHOT and \PaperASVTwoBBCFOne{} on BBC. On ClipShots, the fixed configuration reaches \PaperASVTwoClipDeployFOne; a same-checkpoint threshold sweep reaches \PaperASVTwoClipBestFOne{} at $\theta=\PaperClipBestThreshold$. The latter is reported for transparency and is not treated as the fixed deployment result. Reported baselines come from the original papers, whereas reproduced baselines use our evaluation pipeline. The TransNetV2 reproduction was not evaluated on SHOT.
+\subsection{Evaluation Tracks and Reproducibility Tiers}
+\label{sec:tracks}
 
-\begin{table*}[!t]
-\caption{F1-score Comparison Across Evaluation Datasets}
-\label{tab:main_results}
+The paper separates headline reporting from controlled component analysis.
+\emph{Track 1 (deployed checkpoint)} provides the headline numbers: the head
+trained for deployment with the fixed configuration
+$T^{*}=\PaperDeployTemperature$, $\sigma=\PaperGaussianSigma$, and
+$\theta=\PaperDeployThreshold$. We regenerated its test logits from the local
+video splits with full coverage (200/200 SHOT, 11/11 BBC, and 500/500
+ClipShots videos) and checksum the resulting logits and result JSON files.
+\emph{Track 2 (controlled replication)} retrains the head under the frozen
+validation-only protocol of Section~\ref{sec:protocol} (configuration B4) with
+full logit caches. Paired bootstrap intervals, calibration diagnostics,
+ablations, and the seed study are anchored on this controlled track. Because
+the replication was trained in a separate environment with its own validation
+pool, its absolute scores differ slightly from the deployed checkpoint. To
+avoid mixing absolute scales, replication analyses are reported as
+\emph{differences} against the internal BCE control (A1), while absolute F1
+values in the paper refer to the deployed checkpoint.
+
+\subsection{Main Results}
+
+Table~\ref{tab:overall} reports F1 across SHOT, BBC, and ClipShots. With the
+fixed deployment configuration, AutoShotV2 reaches
+\PaperDeployShotFOne{} on SHOT and \PaperDeployBBCFOne{} on BBC, improving
+over the reproduced AutoShot baseline by \PaperDeployVsAutoShotPP{}
+percentage points and over the reported TransNetV2 baseline by
+\PaperDeployVsTransNetPP{} percentage points in F1 on SHOT
+(Fig.~\ref{fig:bars}). On
+ClipShots the fixed configuration reaches \PaperDeployClipFOne{}; a separate
+test-set threshold sweep reaches \PaperDeployClipBestFOne{} at
+$\theta=0.15$, reported for transparency but not treated as the fixed
+deployment result. Baseline labels distinguish protocol sources: reported
+baselines follow their authors' protocols, whereas reproduced baselines use
+our evaluation pipeline. The TransNetV2 reproduction was not evaluated on
+SHOT.
+
+\begin{table}[!t]
+\caption{F1 Score Comparison Across Evaluation Datasets}
+\label{tab:overall}
 \centering
 \small
-\renewcommand{\arraystretch}{1.15}
-\begin{tabular}{L{2.45in}C{1.0in}C{1.0in}C{1.0in}}
+\renewcommand{\arraystretch}{1.08}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{L{2.15in}C{0.55in}C{0.55in}C{0.7in}}
 \toprule
 \textbf{Method} & \textbf{SHOT} & \textbf{BBC} & \textbf{ClipShots} \\
 \midrule
 \PaperMainResultRows
 \bottomrule
 \end{tabular}
-\end{table*}
-
-\subsubsection{Dataset-Specific Best Results}
-Table~\ref{tab:dataset_best_results} reports the best observed setting for each evaluation dataset. For SHOT and ClipShots, these rows use a dataset-specific configuration ($T=\PaperDatasetBestTemperature$, $\sigma=\PaperDatasetBestSigma$, $\gamma=\PaperDatasetBestGamma$, $\alpha=\PaperDatasetBestAlpha$, many-hot weight $\PaperDatasetBestManyHotWeight$, and learning rate $ \PaperDatasetBestLearningRate $) and a separately selected decision threshold. BBC already reaches its peak under the fixed deployment configuration. The best per-dataset F1 scores are \PaperASVTwoShotDatasetBestFOne{} on SHOT, \PaperASVTwoClipDatasetBestFOne{} on ClipShots, and \PaperASVTwoBBCDatasetBestFOne{} on BBC. These numbers show the per-domain improvement ceiling and are kept separate from the single fixed deployment protocol in Table~\ref{tab:main_results}.
-
-\begin{table*}[!t]
-\caption{Dataset-specific Best Results for AutoShotV2}
-\label{tab:dataset_best_results}
-\centering
-\small
-\setlength{\tabcolsep}{4pt}
-\renewcommand{\arraystretch}{1.15}
-\begin{tabular}{L{1.05in}C{0.75in}C{0.85in}C{0.85in}C{0.85in}C{0.85in}C{0.85in}}
-\toprule
-\textbf{Dataset} & \textbf{Best $\theta$} & \textbf{Precision} & \textbf{Recall} & \textbf{Best F1} & \textbf{Fixed F1} & \textbf{$\Delta$ F1 (pp)} \\
-\midrule
-\PaperDatasetBestRows
-\bottomrule
-\end{tabular}
-\end{table*}
+}
+\end{table}
 
 \begin{figure}[!t]
 \centering
-\begin{tikzpicture}[font=\scriptsize]
-\def\scale{20}
-\def\xzero{0.70}
-\def\barh{0.34}
-\pgfmathsetmacro{\valT}{20*(\PaperTransNetShotFOne-0.70)}
-\pgfmathsetmacro{\valA}{20*(\PaperAutoShotShotFOne-0.70)}
-\pgfmathsetmacro{\valV}{20*(\PaperASVTwoShotFOne-0.70)}
-\draw[->] (0,-0.2) -- (5.25,-0.2) node[right] {F1};
-\draw (0,-0.2) -- (0,3.05);
-\foreach \v/\x in {0.70/0,0.75/1,0.80/2,0.85/3,0.90/4,0.95/5} {
-    \draw[gray!40] (\x,-0.2) -- (\x,2.85);
-    \draw (\x,-0.2) -- (\x,-0.28);
-    \node[below] at (\x,-0.28) {\v};
+\begin{tikzpicture}[font=\small]
+\pgfmathsetmacro{\vone}{(\PaperDeployShotFOne-0.70)*20}
+\pgfmathsetmacro{\vtwo}{(\PaperAutoShotShotFOne-0.70)*20}
+\pgfmathsetmacro{\vthree}{(\PaperTransNetShotFOne-0.70)*20}
+\fill[red!70] (0,2.0) rectangle (\vone,2.5);
+\node[right] at (\vone,2.25) {\PaperDeployShotFOne};
+\node[left] at (0,2.25) {AutoShotV2};
+\fill[green!60!black] (0,1.1) rectangle (\vtwo,1.6);
+\node[right] at (\vtwo,1.35) {\PaperAutoShotShotFOne};
+\node[left] at (0,1.35) {AutoShot};
+\fill[blue!60] (0,0.2) rectangle (\vthree,0.7);
+\node[right] at (\vthree,0.45) {\PaperTransNetShotFOne};
+\node[left] at (0,0.45) {TransNetV2};
+\draw[-{Stealth[length=4pt]}] (0,0) -- (5.5,0) node[right] {F1};
+\foreach \x/\lab in {0/0.70, 1/0.75, 2/0.80, 3/0.85, 4/0.90, 5/0.95} {
+  \draw (\x,0) -- (\x,-0.07) node[below, font=\scriptsize] {\lab};
 }
-\fill[blue!55] (0,0.15) rectangle (\valT,0.15+\barh);
-\fill[green!55!black] (0,1.10) rectangle (\valA,1.10+\barh);
-\fill[red!70!orange] (0,2.05) rectangle (\valV,2.05+\barh);
-\node[anchor=east] at (-0.08,0.32) {TransNetV2};
-\node[anchor=east] at (-0.08,1.27) {AutoShot};
-\node[anchor=east] at (-0.08,2.22) {AutoShotV2};
-\node[anchor=west] at (\valT+0.08,0.32) {\PaperTransNetShotFOne};
-\node[anchor=west] at (\valA+0.08,1.27) {\PaperAutoShotShotFOne};
-\node[anchor=west,font=\bfseries] at (\valV+0.08,2.22) {\PaperASVTwoShotFOne};
+\draw (0,0) -- (0,2.7);
 \end{tikzpicture}
-\caption{F1-score comparison on SHOT. AutoShotV2 improves the reproduced AutoShot baseline by \PaperASVTwoVsAutoShotPP{} points and the reported TransNetV2 baseline by \PaperASVTwoVsTransNetPP{} points.}
-\label{fig:shot_f1}
+\caption{F1 score comparison on SHOT. AutoShotV2 improves the reproduced
+AutoShot baseline by \PaperDeployVsAutoShotPP{} percentage points and the
+reported TransNetV2 baseline by \PaperDeployVsTransNetPP{} percentage
+points in F1.}
+\label{fig:bars}
 \end{figure}
 
-\textbf{Controlled ablation study.} Table~\ref{tab:ablation} reports the Phase 2 ablation conducted on the cached-feature pipeline. A1 is the controlled BCE + one-hot reference. A0 is a historical AutoShot baseline evaluated with a per-dataset best-threshold sweep and should not be interpreted as a protocol-matched control. The B4 configuration is selected because it gives the strongest SHOT improvement while preserving the BBC guardrail. EMA is excluded because the available EMA experiment fine-tunes the full model on a different training pipeline.
+\subsection{Controlled Component Analysis}
 
-\begin{table*}[!t]
-\caption{Controlled Phase 2 Ablation (Separate from the Deploy Checkpoint)}
-\label{tab:ablation}
+All remaining analyses use Track 2: the controlled B4 replication whose
+protocol is summarized in Table~\ref{tab:protocol}.
+
+\begin{table}[!t]
+\caption{Fixed Reproducible Evaluation Protocol (Controlled Track)}
+\label{tab:protocol}
 \centering
 \small
-\renewcommand{\arraystretch}{1.15}
-\begin{tabular}{L{3.0in}C{1.0in}C{1.0in}C{1.0in}}
+\renewcommand{\arraystretch}{1.08}
+\begin{tabular}{L{1.45in}L{1.55in}}
+\toprule
+\textbf{Item} & \textbf{Setting} \\
+\midrule
+Training objective & BCE, one-hot labels \\
+Training / data seed & 42 / 42 \\
+Training budget & 20 epochs, batch size 512 \\
+Sampling & At most 160 frames/video, 3 negatives/positive \\
+Validation size & 200 videos \\
+Validation selection & 5 source-stratified folds \\
+Selection criterion & Mean macro-F1 across sources/folds \\
+Selected temperature & \PaperBFourTemperature \\
+Gaussian smoothing & $\sigma=\PaperGaussianSigma$ \\
+Decision threshold & $\theta=\PaperDeployThreshold$ \\
+Matching tolerance & $\pm\PaperMatchTolerance$ frames \\
+Bootstrap & 10,000 video resamples, seed 42 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Relative to the A1 control, the selected B4 configuration improves SHOT by
+\PaperBFourVsAOneShotPP{} percentage points and ClipShots by
+\PaperBFourVsAOneClipPP{} percentage points in F1, while BBC is unchanged after
+rounding.
+Temperature scaling alone preserves the validation-selected operating point;
+Gaussian smoothing is the component that changes boundary decisions.
+
+Table~\ref{tab:paired_delta} bootstraps the per-video difference between A1
+at its validation-selected threshold and B4 at its frozen operating point
+(10,000 paired video resamples). The intervals support positive B4 deltas
+on SHOT and ClipShots. The BBC interval contains zero, so we make no
+improvement claim for that dataset; BBC also has only 11 sampling units, so
+its interval should be interpreted cautiously.
+
+\begin{table}[!t]
+\caption{Paired Video Bootstrap Difference, B4 Minus A1 (Absolute Percentage Points)}
+\label{tab:paired_delta}
+\centering
+\small
+\renewcommand{\arraystretch}{1.08}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{L{0.8in}C{0.6in}C{1.25in}C{0.65in}}
+\toprule
+\textbf{Dataset} & \textbf{$\Delta$F1 (pp)} & \textbf{95\% CI (pp)} & \textbf{Excl. 0} \\
+\midrule
+\PaperPairedDeltaRows
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+\subsection{Calibration Diagnostics}
+
+We evaluate frame probabilities on the combined 200-video validation split
+using negative log-likelihood (NLL), Brier score, expected calibration error
+with 15 equal-width bins (ECE), equal-mass adaptive ECE (AECE), and
+class-balanced ECE (B-ECE). Table~\ref{tab:calibration_metrics} shows that
+temperature scaling improves all diagnostics on this split. The much larger
+B-ECE reveals that aggregate frame metrics are dominated by negative frames.
+Because the same validation split fits temperature, these values are used as
+diagnostics rather than as untouched calibration estimates.
+
+\begin{table}[!t]
+\caption{Frame-Level Validation Calibration Diagnostics}
+\label{tab:calibration_metrics}
+\centering
+\scriptsize
+\renewcommand{\arraystretch}{1.08}
+\setlength{\tabcolsep}{2pt}
+\begin{tabular}{L{0.85in}C{0.45in}C{0.45in}C{0.45in}C{0.45in}C{0.45in}}
+\toprule
+\textbf{Variant} & \textbf{NLL} & \textbf{Brier} & \textbf{ECE} & \textbf{AECE} & \textbf{B-ECE} \\
+\midrule
+\PaperCalibrationMetricRows
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{reliability_diagram.png}
+\caption{Reliability diagram on the combined validation split. Temperature
+scaling reduces aggregate error. Equal-mass bins expose sparsely populated
+confidence regions.}
+\label{fig:reliability}
+\end{figure}
+
+Table~\ref{tab:test_calibration} reports test-set calibration using the
+temperature selected on validation. ClipShots has the largest B-ECE despite
+a small aggregate ECE, consistent with domain-shifted false positives.
+
+\begin{table}[!t]
+\caption{Test Calibration at the Validation-Selected Temperature}
+\label{tab:test_calibration}
+\centering
+\scriptsize
+\renewcommand{\arraystretch}{1.08}
+\setlength{\tabcolsep}{2pt}
+\begin{tabular}{L{0.45in}C{0.47in}C{0.47in}C{0.47in}C{0.47in}C{0.47in}}
+\toprule
+\textbf{Dataset} & \textbf{NLL} & \textbf{Brier} & \textbf{ECE} & \textbf{AECE} & \textbf{B-ECE} \\
+\midrule
+\PaperTestCalibrationRows
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Controlled Training Ablation}
+\label{sec:ablation}
+
+Table~\ref{tab:ablation} reports the outcome of the design space of
+Section~\ref{sec:objectives} as F1 differences against the A1 control. A2,
+A3, and B1 show that Focal Loss and many-hot supervision do not improve the
+control. B5 combines these training changes with B4 post-processing and is
+numerically similar on SHOT but slightly weaker on BBC and ClipShots. The
+observed gain therefore comes from calibrated post-processing rather than
+from the more complex training objective. A0 is omitted because its per-dataset
+best-threshold protocol is not a direct controlled comparison.
+
+\begin{table}[!t]
+\caption{Controlled Phase 2 Ablation: $\Delta$F1 Against the A1 BCE Control (Percentage Points)}
+\label{tab:ablation}
+\centering
+\scriptsize
+\renewcommand{\arraystretch}{1.04}
+\setlength{\tabcolsep}{2pt}
+\begin{tabular}{L{1.7in}C{0.4in}C{0.4in}C{0.4in}}
 \toprule
 \textbf{Configuration} & \textbf{SHOT} & \textbf{BBC} & \textbf{ClipShots} \\
 \midrule
-\PaperControlledAblationRows
+\PaperAblationDeltaRows
 \bottomrule
 \end{tabular}
-\end{table*}
+\end{table}
 
-\subsection{Performance on Downstream Datasets}
+\subsection{Efficiency and Reproducibility}
 
-\textbf{Effect on short-video data.} The robust improvements on SHOT indicate that AutoShotV2 effectively models short-video characteristics. The Focal Loss tackles the extreme class imbalance between boundary and non-boundary frames, while the many-hot auxiliary target supplies denser gradients around ambiguous transitions without diluting precision. Simultaneously, Gaussian smoothing heavily suppresses isolated false peaks, which frequently occur in short videos due to rapid camera motion and strong visual editing effects.
-
-\textbf{Cross-domain behavior and ClipShots error analysis.} While AutoShotV2 transfers well to the structured documentary footage of BBC, the fixed deployment configuration reaches only \PaperASVTwoClipDeployFOne{} on the wild, open-world ClipShots dataset (Table~\ref{tab:main_results}). To diagnose this, Table~\ref{tab:clipshots_breakdown} splits ClipShots performance by transition type using the same fixed threshold $\theta=\PaperDeployThreshold$.
+The backbone remains frozen, so only the Phase 2 head is optimized.
+Table~\ref{tab:efficiency} reports parameter and run-artifact statistics.
+The CPU post-processing measurement covers temperature scaling and Gaussian
+smoothing on cached logits. End-to-end video decoding and backbone inference
+are excluded. The original run artifact did not retain elapsed training time,
+so we do not estimate or reconstruct it.
 
 \begin{table}[!t]
-\caption{ClipShots Breakdown by Transition Type at the Fixed Deploy Threshold}
+\caption{Efficiency and Run-Artifact Statistics}
+\label{tab:efficiency}
+\centering
+\small
+\renewcommand{\arraystretch}{1.06}
+\begin{tabular}{L{1.9in}L{1.05in}}
+\toprule
+\textbf{Item} & \textbf{Value} \\
+\midrule
+\PaperEfficiencyRows
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{ClipShots Transition-Type Recall}
+
+We regenerate the ClipShots breakdown directly from the B4 logits and
+\texttt{test.json}. One malformed annotation with reversed endpoints is
+normalized by sorting the pair. A ground-truth interval is a cut when its
+width is at most one frame and gradual otherwise. Predictions are
+class-agnostic, so they are matched once and recall is grouped by the matched
+ground-truth type. Type-specific precision and F1 are not reported because the
+model does not predict a transition type.
+
+\begin{table}[!t]
+\caption{ClipShots Recall by Ground-Truth Transition Type}
 \label{tab:clipshots_breakdown}
 \centering
 \small
-\renewcommand{\arraystretch}{1.12}
+\renewcommand{\arraystretch}{1.08}
 \resizebox{\columnwidth}{!}{%
-\begin{tabular}{L{1.25in}C{0.65in}C{0.65in}C{0.65in}}
+\begin{tabular}{L{0.8in}C{0.7in}C{0.65in}C{0.65in}C{0.65in}}
 \toprule
-\textbf{Transition} & \textbf{Prec.} & \textbf{Rec.} & \textbf{F1} \\
+\textbf{Type} & \textbf{GT} & \textbf{Matched} & \textbf{Missed} & \textbf{Recall} \\
 \midrule
 \PaperClipBreakdownRows
 \bottomrule
@@ -160,4 +341,41 @@ Table~\ref{tab:dataset_best_results} reports the best observed setting for each 
 }
 \end{table}
 
-The breakdown reveals that the primary source of degradation is the extremely low recall (4.42\%) on gradual transitions. We attribute this to three potential causes: (1) the $\pm1$ many-hot window may be too narrow for ClipShots' extended gradual transitions; (2) the temperature learned on SHOT miscalibrates the logit distribution for ClipShots; and (3) the chosen Focal Loss parameters heavily emphasize SHOT's specific hard examples over open-world editing styles.
+The gradual-transition recall of 0.8089 is lower than the cut recall of
+0.8991, but it is not the dominant source of the overall ClipShots gap.
+The remaining gap is instead associated with false-positive peaks under
+open-world effects and domain shift.
+
+\subsection{Training-Seed Robustness}
+\label{sec:seed_robustness}
+
+To quantify optimization variability, we retrained the BCE one-hot head
+\PaperSeedCount{} times with training seeds 42, 43, and 44 while holding the
+data seed, the training-video selection, and the sample cache identity fixed.
+Each run selected its own post-processing configuration with the frozen
+five-fold validation-only protocol of Section~\ref{sec:protocol} before any
+test evaluation. Consistent with the delta-only reporting of
+Section~\ref{sec:tracks}, we summarize this study by its dispersion: the
+sample standard deviation of test F1 across seeds is
+\PaperSeedShotFOneStd{} percentage points on SHOT,
+\PaperSeedBBCFOneStd{} percentage points on BBC, and
+\PaperSeedClipFOneStd{} percentage points on ClipShots --- below
+0.5 percentage points on every dataset and an
+order of magnitude smaller than the paired bootstrap interval widths of
+Table~\ref{tab:paired_delta}. In these runs, head-training randomness is a
+smaller source of variation than video sampling. This study isolates
+training-seed sensitivity end to end, complementing the component analysis of
+Table~\ref{tab:ablation}.
+
+\subsection{Limitations}
+
+The study has four important limitations. First, although the headline
+checkpoint logits have been regenerated from complete local video splits, the
+three-seed study of Section~\ref{sec:seed_robustness} measures optimization
+variability for the controlled pipeline and does not reproduce either
+checkpoint bit for bit. Second, the historical sample cache recorded 400
+videos and 33,174 frames but not the selected IDs; the current manifests fix
+this for future runs but cannot reconstruct the old cache contents. Third,
+validation calibration diagnostics reuse the temperature-selection data.
+Fourth, the frozen representation does not fully control cross-domain false
+positives on ClipShots.
