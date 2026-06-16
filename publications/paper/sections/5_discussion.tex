@@ -1,0 +1,46 @@
+\section{Discussion}
+\label{sec:discussion}
+
+\textbf{Where the gain comes from.} The controlled ablation reframes the
+training design space of Section~\ref{sec:objectives}. Focal Loss and
+many-hot supervision leave the BCE control statistically unchanged, whereas
+post-processing changes the operating point: Gaussian smoothing changes
+boundary decisions, and temperature scaling improves probability quality
+without changing the ranking. For a frozen-feature pipeline, this ordering
+is practically important. The post-processing search runs on cached logits
+and can be repeated for a deployment domain without retraining the
+representation.
+
+\textbf{What aggregate calibration hides.} After temperature scaling, the
+equal-width ECE falls to 0.002214, yet the class-balanced ECE remains
+0.070405. The gap follows from boundary sparsity: non-boundary frames
+dominate aggregate confidence bins, so a low aggregate score can coexist
+with poorer calibration on the rare positive class. Reporting only
+aggregate ECE would therefore overstate calibration quality for SBD and
+likely for other sparse temporal-event tasks. Event-conditional calibration,
+such as fitting a separate temperature on boundary-adjacent frames, is a
+natural next step, but it requires an independent calibration split that the
+present protocol does not reserve.
+
+\textbf{Sources of uncertainty.} The two uncertainty analyses answer
+complementary questions. Paired video bootstrap intervals
+(Table~\ref{tab:paired_delta}) estimate how much the measured deltas depend
+on which videos are sampled. The three-seed study estimates the sensitivity
+of the controlled pipeline to head-training randomness. In our runs, the
+seed-induced standard deviations are below 0.5 percentage points in F1
+across all three datasets and are much smaller than the paired bootstrap
+interval widths. The remaining unquantified term is protocol variability,
+because
+the frozen five-fold selection is itself a function of the validation
+videos.
+
+\textbf{The ClipShots gap is a precision problem.} The transition-type
+breakdown shows gradual-transition recall (0.8089) trailing cut recall
+(0.8991), but the dominant loss is aggregate precision
+(\PaperDeployClipPrecision): open-world content produces false-positive
+peaks that survive smoothing. A frozen representation cannot adapt to this
+distribution shift by construction, so threshold or temperature changes can
+only trade recall for precision along a fixed curve. Closing the gap likely
+requires domain-adaptive components, either lightweight adapters on the
+frozen backbone or domain-specific post-processing selection, rather than
+further tuning of the present loss-design space.
