@@ -200,16 +200,15 @@ Ba kết luận có kiểm chứng:
 
 \begin{table}[H]
 \centering
-\caption[Breakdown theo loại chuyển cảnh trên ClipShots]{Breakdown Precision, Recall và F1 theo loại chuyển cảnh trên ClipShots test (500 video, ngưỡng $\theta = 0.10$).}
+\caption[Phân tách kết quả theo loại chuyển cảnh trên ClipShots]{Phân tách kết quả phát hiện theo loại chuyển cảnh (đột ngột và dần) trên tập ClipShots test (500 video, ngưỡng $\theta = 0.10$).}
 \label{tab:clipshots_breakdown}
 \small
-\begin{tabular}{lccc}
+\begin{tabular}{lcccc}
 \toprule
-\textbf{Loại chuyển cảnh} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} \\
+\textbf{Loại chuyển cảnh} & \textbf{Ground Truth} & \textbf{Matched} & \textbf{Missed} & \textbf{Recall} \\
 \midrule
-Cut (chuyển cảnh đột ngột) & 0.5826 & 0.8860 & 0.7030 \\
-Gradual (chuyển cảnh dần) & 0.6456 & 0.0442 & 0.0828 \\
-\textbf{Tổng}              & \textbf{0.7477} & \textbf{0.7897} & \textbf{0.7681} \\
+Cut (chuyển cảnh đột ngột) & 4907 & 4412 & 495 & 0.8991 \\
+Gradual (chuyển cảnh dần) & 2302 & 1862 & 440 & 0.8089 \\
 \bottomrule
 \end{tabular}
 \end{table}
