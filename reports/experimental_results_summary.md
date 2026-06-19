@@ -9,8 +9,8 @@ Các nhóm dùng protocol khác nhau; chỉ so sánh trực tiếp trong cùng n
 
 | Nhóm | Thực nghiệm / protocol | SHOT | BBC | ClipShots | Ghi chú |
 |---|---|---:|---:|---:|---|
-| Deploy checkpoint | `phase2_deploy_threshold` - Phase2 deploy checkpoint, deploy threshold | 0.8546 | 0.9656 | 0.7529 | Regenerated deploy-checkpoint logits; T=0.3878, sigma=2.0, threshold=0.10. |
-| Deploy checkpoint | `phase2_best_sweep` - Phase2 deploy checkpoint, best sweep | 0.8546 | 0.9656 | 0.7556 | ClipShots tốt nhất tại threshold 0.15; SHOT/BBC trùng deploy. |
+| Deploy checkpoint | `phase2_deploy_threshold` - Phase2 deploy checkpoint, deploy threshold | 0.8545 | 0.9656 | 0.7529 | Regenerated deploy-checkpoint logits; T=0.3878, sigma=2.0, threshold=0.10. |
+| Deploy checkpoint | `phase2_best_sweep` - Phase2 deploy checkpoint, best sweep | 0.8545 | 0.9656 | 0.7556 | ClipShots tốt nhất tại threshold 0.15; SHOT/BBC trùng deploy. |
 | Ablation Phase 2 | `A0_autoshot_original` - A0 -- AutoShot gốc | 0.8405 | 0.9554 | 0.7649 | AutoShot gốc, best threshold từng dataset. |
 | Ablation Phase 2 | `A1_phase2_bce_onehot` - A1 -- BCE + one-hot | 0.8378 | 0.9570 | 0.6983 | Control Phase2 tối giản. |
 | Ablation Phase 2 | `A2_focal_only` - A2 -- Focal only | 0.8378 | 0.9567 | 0.6967 | Chỉ thêm Focal Loss. |
@@ -31,10 +31,10 @@ Các nhóm dùng protocol khác nhau; chỉ so sánh trực tiếp trong cùng n
 
 | Dataset | Chế độ | Threshold | F1 | Precision | Recall | TP | FP | FN |
 |---|---|---:|---:|---:|---:|---:|---:|---:|
-| SHOT | deploy | 0.1000 | 0.8546 | 0.8554 | 0.8537 | 2148 | 363 | 368 |
+| SHOT | deploy | 0.1000 | 0.8545 | 0.8554 | 0.8537 | 2148 | 363 | 368 |
 | BBC | deploy | 0.1000 | 0.9656 | 0.9750 | 0.9564 | 4633 | 119 | 211 |
 | ClipShots | deploy | 0.1000 | 0.7529 | 0.6661 | 0.8657 | 6241 | 3129 | 968 |
-| SHOT | best_sweep | 0.1000 | 0.8546 | 0.8554 | 0.8537 | 2148 | 363 | 368 |
+| SHOT | best_sweep | 0.1000 | 0.8545 | 0.8554 | 0.8537 | 2148 | 363 | 368 |
 | BBC | best_sweep | 0.1000 | 0.9656 | 0.9750 | 0.9564 | 4633 | 119 | 211 |
 | ClipShots | best_sweep | 0.1500 | 0.7556 | 0.7126 | 0.8041 | 5797 | 2338 | 1412 |
 

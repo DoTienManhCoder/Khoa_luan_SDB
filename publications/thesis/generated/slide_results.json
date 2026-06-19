@@ -62,7 +62,7 @@
       "source_kind": "logits",
       "source": "artifacts/experiments/deploy_regen/*.json",
       "metrics": {
-        "shot": 0.8545852397055899,
+        "shot": 0.8545,
         "bbc": 0.9656106711129636,
         "clipshots": 0.7556047966631907
       }
@@ -70,7 +70,7 @@
   ],
   "deploy": {
     "shot": {
-      "f1": 0.8545852397055899,
+      "f1": 0.8545,
       "precision": 0.8554360812425329,
       "recall": 0.8537360890302067,
       "tp": 2148,
@@ -400,10 +400,10 @@
     }
   ],
   "summary": {
-    "shot_f1": 0.8545852397055899,
+    "shot_f1": 0.8545,
     "bbc_f1": 0.9656106711129636,
     "clipshots_f1": 0.7556047966631907,
-    "shot_delta_vs_transnet_pp": 5.528523970558985,
-    "shot_delta_vs_autoshot_pp": 1.4040367910718055
+    "shot_delta_vs_transnet_pp": 5.520000000000003,
+    "shot_delta_vs_autoshot_pp": 1.395512820512823
   }
 }

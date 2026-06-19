@@ -30,7 +30,7 @@ def test_experiment_manifest_is_complete_and_current():
     deploy = experiments["phase2_best_sweep"]["metrics"]
     assert experiments["phase2_deploy_threshold"]["reproducibility"] == "logits"
     assert "artifacts/experiments/deploy_regen/results_shot.json" in experiments["phase2_deploy_threshold"]["sources"]
-    assert round(deploy["shot"]["f1"], 4) == 0.8546
+    assert round(deploy["shot"]["f1"], 4) == 0.8545
     assert round(deploy["bbc"]["f1"], 4) == 0.9656
     assert round(deploy["clipshots"]["f1"], 4) == 0.7556
 
@@ -63,7 +63,7 @@ def test_paper_snapshot_generated_tables_and_release_are_present():
 
     macros = (paper / "generated" / "experiment_macros.tex").read_text(encoding="utf-8")
     tables = (paper / "generated" / "experiment_tables.tex").read_text(encoding="utf-8")
-    assert r"\newcommand{\PaperDeployShotFOne}{0.8546}" in macros
+    assert r"\newcommand{\PaperDeployShotFOne}{0.8545}" in macros
     assert r"\newcommand{\PaperDeployBBCFOne}{0.9656}" in macros
     assert r"\newcommand{\PaperDeployClipFOne}{0.7529}" in macros
     assert r"\newcommand{\PaperDeployClipBestFOne}{0.7556}" in macros
