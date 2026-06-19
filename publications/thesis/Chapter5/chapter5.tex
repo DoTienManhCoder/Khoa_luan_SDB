@@ -23,14 +23,14 @@ Các kết quả thực nghiệm đạt được trong khóa luận cho phép tr
 
     \item \textbf{RQ2: Có thể cải thiện hiệu năng của mô hình AutoShot trên tập video ngắn bằng cách tối ưu hóa tầng phân loại và hậu xử lý xác suất mà không cần huấn luyện lại hoặc thay đổi mạng xương sống (backbone) không?}
     
-    \textit{Trả lời:} Có. Bằng cách bổ sung các kỹ thuật cải tiến ở Phase 2 bao gồm: huấn luyện tầng phân loại mới với hàm Focal Loss, áp dụng nhãn many-hot thích ứng, hiệu chỉnh nhiệt độ xác suất (Temperature scaling) và làm mượt bằng bộ lọc Gaussian (Gaussian smoothing), biến thể AutoShotV2 đã đạt điểm F1 lên tới **`\ASVTwoShotFOne{}`** trên tập SHOT. Đây là mức cải thiện khoảng **`+\ASVTwoVsAutoShotShotPP\%`** so với AutoShot gốc và **`+\ASVTwoVsTransNetShotPP\%`** so với TransNetV2 mô hình cơ sở, chứng minh tính khả thi và hiệu quả kinh tế rất cao của việc tối ưu hóa tầng phân loại trên một backbone đã được đóng băng.
+    \textit{Trả lời:} Có. Bằng cách bổ sung các kỹ thuật cải tiến ở Phase 2 bao gồm: huấn luyện tầng phân loại mới với hàm Focal Loss, áp dụng nhãn many-hot thích ứng, hiệu chỉnh nhiệt độ xác suất (Temperature scaling) và làm mượt bằng bộ lọc Gaussian (Gaussian smoothing), biến thể AutoShotV2 đã đạt điểm F1 lên tới \textbf{\ASVTwoShotFOne{}} trên tập SHOT. Đây là mức cải thiện khoảng \textbf{+\ASVTwoVsAutoShotShotPP\%} so với AutoShot gốc và \textbf{+\ASVTwoVsTransNetShotPP\%} so với TransNetV2 mô hình cơ sở, chứng minh tính khả thi và hiệu quả kinh tế rất cao của việc tối ưu hóa tầng phân loại trên một backbone đã được đóng băng.
 
     \item \textbf{RQ3: Mô hình đề xuất có giữ được khả năng tổng quát hóa tốt trên các miền dữ liệu video khác ngoài video ngắn (như video tài liệu dài hoặc video thế giới mở đa dạng) không?}
     
     \textit{Trả lời:} Một phần. 
     \begin{itemize}
-        \item Đối với miền video tài liệu dài (\textbf{BBC Planet Earth}), AutoShotV2 thể hiện khả năng tổng quát hóa rất tốt khi đạt F1 = **`\ASVTwoBBCFOne{}`**, vượt qua cả TransNetV2 tự chạy lại (`0.9593`) và AutoShot gốc (`0.9554`).
-        \item Tuy nhiên, trên tập dữ liệu thế giới mở đa dạng (\textbf{ClipShots}), hiệu năng của AutoShotV2 bị suy giảm xuống còn **`\ASVTwoClipFOne{}`**, thấp hơn AutoShot báo cáo gốc khoảng $3.1$ điểm phần trăm. Thử nghiệm này cho thấy các tham số hậu xử lý và tầng phân loại được tối ưu hóa cho phân phối của SHOT chưa thể chuyển dịch hoàn hảo sang các miền dữ liệu phức tạp hơn của ClipShots.
+        \item Đối với miền video tài liệu dài (\textbf{BBC Planet Earth}), AutoShotV2 thể hiện khả năng tổng quát hóa rất tốt khi đạt F1 = \textbf{\ASVTwoBBCFOne{}}, vượt qua cả TransNetV2 tự chạy lại ($0.9593$) và AutoShot gốc ($0.9554$).
+        \item Tuy nhiên, trên tập dữ liệu thế giới mở đa dạng (\textbf{ClipShots}), hiệu năng của AutoShotV2 bị suy giảm xuống còn \textbf{\ASVTwoClipFOne{}}, thấp hơn AutoShot báo cáo gốc khoảng $3.1$ điểm phần trăm. Thử nghiệm này cho thấy các tham số hậu xử lý và tầng phân loại được tối ưu hóa cho phân phối của SHOT chưa thể chuyển dịch hoàn hảo sang các miền dữ liệu phức tạp hơn của ClipShots.
     \end{itemize}
 \end{itemize}
 
@@ -47,7 +47,7 @@ Bên cạnh ba câu trả lời cho RQ ở trên, khóa luận còn ghi nhận m
 Mặc dù đạt được những kết quả cải tiến khả quan, đề tài vẫn tồn tại một số hạn chế quan trọng cần thảo luận:
 
 \subsection{Hiệu năng suy giảm trên nhóm chuyển cảnh dần (Gradual Transition)}
-Kết quả phân tách Recall của AutoShotV2 trên ClipShots theo loại chuyển cảnh ở Bảng~\ref{tab:clipshots_breakdown} chỉ ra rằng nhóm chuyển cảnh dần (\textit{gradual transition}) có Recall đạt **`80.89\%`**, thấp hơn so với ranh giới cắt cảnh đột ngột (\textit{cut}) vốn đạt **`89.91\%`**. Mặc dù mô hình đã nhận diện thành công phần lớn các chuyển cảnh mềm, việc bỏ sót khoảng **`19.11\%`** số lượng chuyển cảnh dần (so với chỉ **`10.09\%`** của ranh giới đột ngột) cho thấy các hiệu ứng chuyển cảnh dần (như dissolve, fade, wipe) trên ClipShots vẫn là một thách thức lớn hơn. Điều này là do phân phối chuyển cảnh dần trên ClipShots đa dạng và kéo dài hơn nhiều so với SHOT, khiến mô hình khó nhận diện một cách trọn vẹn so với các ranh giới cắt cảnh đột ngột sắc nét.
+Kết quả phân tách Recall của AutoShotV2 trên ClipShots theo loại chuyển cảnh ở Bảng~\ref{tab:clipshots_breakdown} chỉ ra rằng nhóm chuyển cảnh dần (\textit{gradual transition}) có Recall đạt \textbf{80.89\%}, thấp hơn so với ranh giới cắt cảnh đột ngột (\textit{cut}) vốn đạt \textbf{89.91\%}. Mặc dù mô hình đã nhận diện thành công phần lớn các chuyển cảnh mềm, việc bỏ sót khoảng \textbf{19.11\%} số lượng chuyển cảnh dần (so với chỉ \textbf{10.09\%} của ranh giới đột ngột) cho thấy các hiệu ứng chuyển cảnh dần (như dissolve, fade, wipe) trên ClipShots vẫn là một thách thức lớn hơn. Điều này là do phân phối chuyển cảnh dần trên ClipShots đa dạng và kéo dài hơn nhiều so với SHOT, khiến mô hình khó nhận diện một cách trọn vẹn so với các ranh giới cắt cảnh đột ngột sắc nét.
 
 \subsection{Các giả thuyết kỹ thuật chưa được kiểm chứng đầy đủ}
 Từ kết quả thực nghiệm, khóa luận đưa ra ba giả thuyết về sự suy giảm trên ClipShots bao gồm: nhãn many-hot có thể làm mất độ sắc bén của biên cảnh đột ngột; tham số hiệu chỉnh nhiệt độ $T^*$ tối ưu trên SHOT bị lệch phân phối khi sang ClipShots; và cấu hình Focal Loss bị thiên lệch. Do giới hạn về thời gian và tài nguyên tính toán, khóa luận chưa thể thực hiện đầy đủ các thí nghiệm đối chứng tách biệt từng yếu tố (ablation study độc lập) trên ClipShots để chứng minh các giả thuyết này một cách tuyệt đối.
@@ -58,11 +58,17 @@ Từ kết quả thực nghiệm, khóa luận đưa ra ba giả thuyết về s
 Để giải quyết các hạn chế nêu trên, các hướng nghiên cứu tiếp theo được đề xuất bao gồm:
 
 \subsection{Cải tiến mô hình phát hiện chuyển cảnh dần}
-*   **Mã hóa nhãn many-hot thích ứng (Adaptive Many-hot Labels):** Thay vì gán nhãn cố định $\pm 1$ frame, nghiên cứu tiếp theo có thể tự động điều chỉnh độ rộng của vùng nhãn dương dựa trên thời lượng thực tế của hiệu ứng chuyển cảnh dần (được trích xuất từ dữ liệu ground truth).
-*   **Cơ chế Attention thích ứng thời gian:** Bổ sung các khối temporal attention có khả năng tự động điều chỉnh cửa sổ quan sát (receptive field) dài hơn để bắt trọn các chuyển cảnh kéo dài nhiều giây.
+\begin{itemize}
+    \item \textbf{Mã hóa nhãn many-hot thích ứng (Adaptive Many-hot Labels):} Thay vì gán nhãn cố định $\pm 1$ frame, nghiên cứu tiếp theo có thể tự động điều chỉnh độ rộng của vùng nhãn dương dựa trên thời lượng thực tế của hiệu ứng chuyển cảnh dần (được trích xuất từ dữ liệu ground truth).
+    \item \textbf{Cơ chế Attention thích ứng thời gian:} Bổ sung các khối temporal attention có khả năng tự động điều chỉnh cửa sổ quan sát (receptive field) dài hơn để bắt trọn các chuyển cảnh kéo dài nhiều giây.
+\end{itemize}
 
 \subsection{Tối ưu hóa hiệu chỉnh nhiệt độ đa miền (Multi-domain Calibration)}
-*   Nghiên cứu áp dụng các phương pháp hiệu chỉnh nhiệt độ thích ứng theo miền dữ liệu (Domain-specific Temperature Scaling) hoặc huấn luyện mạng hiệu chỉnh xác suất phụ thuộc vào đặc trưng video đầu vào, thay vì cố định một hệ số $T^*$ chung.
+\begin{itemize}
+    \item Nghiên cứu áp dụng các phương pháp hiệu chỉnh nhiệt độ thích ứng theo miền dữ liệu (Domain-specific Temperature Scaling) hoặc huấn luyện mạng hiệu chỉnh xác suất phụ thuộc vào đặc trưng video đầu vào, thay vì cố định một hệ số $T^*$ chung.
+\end{itemize}
 
 \subsection{Mở rộng ma trận thực nghiệm đối chứng}
-*   Thực hiện huấn luyện lại toàn bộ ma trận ablation study trên cả ClipShots và BBC để đánh giá độc lập tác động của từng thành phần (Focal Loss, Many-hot, Gaussian, Temperature) trên từng miền dữ liệu riêng biệt.
+\begin{itemize}
+    \item Thực hiện huấn luyện lại toàn bộ ma trận ablation study trên cả ClipShots và BBC để đánh giá độc lập tác động của từng thành phần (Focal Loss, Many-hot, Gaussian, Temperature) trên từng miền dữ liệu riêng biệt.
+\end{itemize}
