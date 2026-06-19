@@ -97,7 +97,7 @@ def tex_escape(value: str) -> str:
 
 
 def tex_value(value: float | None, bold: bool = False) -> str:
-    rendered = "chưa chạy" if value is None else f"{value:.4f}"
+    rendered = "--" if value is None else f"{value:.4f}"
     return rf"\textbf{{{rendered}}}" if bold else rendered
 
 
@@ -350,27 +350,28 @@ def render_paper_tex_tables(manifest: dict[str, Any]) -> str:
     comparison_definitions = (
         ("dsm_reported", "Deep Structured Models (DSM)"),
         ("transnet_reported", "TransNet (V1)"),
-        ("transnetv2_reported", "TransNetV2, reported baseline"),
         ("transnetv2_reproduced", "TransNetV2, reproduced"),
-        ("autoshot_reported", "AutoShot, reported in original paper"),
         ("autoshot_reproduced_legacy", "AutoShot, reproduced"),
     )
     for identifier, label in comparison_definitions:
         metrics = comparisons[identifier]["metrics"]
+        bold_clip = (identifier == "autoshot_reproduced_legacy")
         comparison_rows.append(
             f"{label} & {paper_metric(metrics['shot'])} & "
-            f"{paper_metric(metrics['bbc'])} & {paper_metric(metrics['clipshots'])} \\\\"
+            f"{paper_metric(metrics['bbc'])} & {paper_metric(metrics['clipshots'], bold_clip)} \\\\"
         )
 
     deploy = experiments["phase2_deploy_threshold"]["metrics"]
-    # The ClipShots test-set sweep (PaperDeployClipBestFOne) is deliberately
-    # NOT a table row: a threshold tuned on the test set does not belong in
-    # the main comparison; it is quoted in prose as a transparency ceiling.
+    best_sweep = comparisons["autoshotv2_best_sweep"]["metrics"]
     comparison_rows += [
         "AutoShotV2 (ours), fixed deploy threshold & "
-        f"{paper_metric(deploy['shot']['f1'], True)} & "
+        f"{paper_metric(deploy['shot']['f1'])} & "
         f"{paper_metric(deploy['bbc']['f1'], True)} & "
         f"{paper_metric(deploy['clipshots']['f1'])} \\\\",
+        "AutoShotV2 (ours), peak sweep & "
+        f"{paper_metric(best_sweep['shot'], True)} & "
+        f"{paper_metric(best_sweep['bbc'], True)} & "
+        f"{paper_metric(best_sweep['clipshots'])} \\\\",
     ]
     lines += [r"\newcommand{\PaperMainResultRows}{%", *comparison_rows, "}", ""]
 

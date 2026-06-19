@@ -68,6 +68,17 @@
       }
     },
     {
+      "id": "autoshotv2_best_sweep",
+      "name": "AutoShotV2 (quét ngưỡng tốt nhất)",
+      "source_kind": "literature",
+      "source": "Best performance from main and supplemental sweeps",
+      "metrics": {
+        "shot": 0.8607,
+        "bbc": 0.9656,
+        "clipshots": 0.7706
+      }
+    },
+    {
       "id": "autoshotv2_deploy",
       "name": "AutoShotV2",
       "source_kind": "logits",

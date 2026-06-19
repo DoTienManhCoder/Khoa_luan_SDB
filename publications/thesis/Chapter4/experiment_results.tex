@@ -18,6 +18,27 @@ Trước khi đi vào từng bảng chi tiết, Bảng~\ref{tab:experiment_group
 \end{tabular}
 \end{table}
 
+\begin{table}[H]
+\centering
+\caption[Kết quả tốt nhất theo mục tiêu đánh giá]{Kết quả tốt nhất theo từng mục tiêu đánh giá. Các dòng dùng protocol khác nhau, vì vậy bảng này dùng để làm nổi bật kết quả mạnh nhất theo từng mục tiêu, không thay thế bảng so sánh chính ở Bảng~\ref{tab:autoshotv2_results}.}
+\label{tab:best_results_showcase}
+\small
+\setlength{\tabcolsep}{2pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{L{3.0cm}L{4.0cm}C{1.35cm}C{1.35cm}C{1.75cm}L{3.5cm}}
+\toprule
+\textbf{Mục tiêu} & \textbf{Cấu hình / protocol} & \textbf{SHOT} & \textbf{BBC} & \textbf{ClipShots} & \textbf{Ghi chú} \\
+\midrule
+Deploy cân bằng & AutoShotV2, ngưỡng cố định $0.10$ & 0.8545 & \textbf{0.9656} & 0.7529 & Headline chính, cùng chính sách triển khai cho ba tập. \\
+Đỉnh SHOT & Sweep tham số bổ sung, best threshold & \textbf{0.8607} & 0.9648 & 0.7706 & Kết quả oracle theo từng bộ dữ liệu, chỉ dùng để phân tích tiềm năng. \\
+ClipShots hiệu chỉnh & A0 + calibration 5-fold CV & 0.8443 & 0.9538 & 0.7881 & Kết quả trung thực hơn cho hiệu chỉnh hậu xử lý theo miền. \\
+ClipShots cao nhất & \texttt{fc1\_0\_v100\_b2}, mở khóa gần head & -- & 0.9341 & \textbf{0.7962} & F1 ClipShots tốt nhất hiện tại; BBC giảm so với deploy chính. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Điểm quan trọng khi đọc Bảng~\ref{tab:best_results_showcase} là không có một cấu hình tốt nhất tuyệt đối cho mọi miền dữ liệu. AutoShotV2 deploy chính vẫn là cấu hình cân bằng nhất trên SHOT/BBC; nếu ưu tiên riêng ClipShots, thí nghiệm mở khóa lớp gần head nhất đạt F1 cao hơn nhưng đánh đổi bằng mức suy giảm trên BBC.
+
 \section{Kết quả chính trên SHOT và các bộ dữ liệu bổ sung}
 
 Bảng~\ref{tab:autoshotv2_results} tổng hợp F1-score của AutoShot, TransNetV2 và biến thể AutoShotV2 khi đánh giá trên ba tập dữ liệu SHOT, BBC và ClipShots.
