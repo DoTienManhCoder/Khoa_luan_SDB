@@ -50,7 +50,7 @@ Bảng~\ref{tab:per_video_clipshots} tổng hợp kết quả F1 trên ClipShots
 \end{table}
 
 \noindent\textbf{Quan sát đáng chú ý.}
-Mức suy giảm khoảng $3.4\%$ của AutoShotV2 so với AutoShot theo báo cáo gốc trên ClipShots cho thấy cấu hình tối ưu cho SHOT chưa chuyển dịch ổn định sang miền dữ liệu đa dạng hơn. Phân tích sâu hơn (xem Chương~\ref{ch:ket_luan}, Mục~\ref{sec:thao_luan_ket_qua}) chỉ ra ba giả thuyết kỹ thuật chính:
+Mức suy giảm khoảng $3.4\%$ của AutoShotV2 so với AutoShot theo báo cáo gốc trên ClipShots cho thấy cấu hình tối ưu cho SHOT chưa chuyển dịch ổn định sang miền dữ liệu đa dạng hơn. Phân tích sâu hơn (xem Chương~\ref{ch:ket_luan}, Mục~\ref{sec:limitations}) chỉ ra ba giả thuyết kỹ thuật chính:
 \begin{enumerate}
     \item Nhãn many-hot $\pm 1$ frame chưa phù hợp với chuyển cảnh hard-cut sắc nét đặc trưng của ClipShots.
     \item Hệ số temperature scaling $T^*$ được tối ưu trên validation SHOT bị lệch khi áp dụng sang ClipShots.
