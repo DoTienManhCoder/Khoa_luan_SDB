@@ -85,3 +85,6 @@ data/
 artifacts/
 .claude
 
+# Reference drafts for the paper rewrite (working files, not release artifacts)
+publications/paper/main_tieng_*.pdf
+
