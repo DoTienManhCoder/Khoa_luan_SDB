@@ -144,6 +144,30 @@ points in F1.}
 \label{fig:bars}
 \end{figure}
 
+\subsection{Supplemental Hyperparameter Sweep}
+\label{sec:extra_param_sweep}
+
+In addition to the primary AutoShotV2 configuration, we conduct a supplemental hyperparameter sweep with a revised training and post-processing setup. Specifically, we set $T^* = 0.2413$, $\sigma = 2.0$, Focal Loss parameters $\gamma = 2.0$ and $\alpha = 0.6$, many-hot supervision weight to $0.3$, learning rate to $7 \times 10^{-6}$, and weight decay to $10^{-4}$. The goal is to investigate whether increasing the focusing parameter of Focal Loss ($\gamma = 2.0$ vs. $1.0$) and reducing the learning rate can yield higher peak F1 scores under per-dataset threshold tuning.
+
+\begin{table}[!t]
+\caption{Peak F1 Scores Under Supplemental Hyperparameter Sweep}
+\label{tab:extra_sweep_peaks}
+\centering
+\small
+\renewcommand{\arraystretch}{1.08}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Dataset} & \textbf{Best Threshold} & \textbf{Precision} & \textbf{Recall} & \textbf{Peak F1} \\
+\midrule
+SHOT & 0.12 & 0.8408 & 0.8816 & \textbf{0.8607} \\
+ClipShots & 0.19 & 0.7011 & 0.8554 & \textbf{0.7706} \\
+BBC & 0.12 & 0.9668 & 0.9628 & 0.9648 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+As shown in Table~\ref{tab:extra_sweep_peaks}, this sweep configuration achieves superior peak F1 scores on SHOT (0.8607 vs. 0.8545, +0.62 pp) and ClipShots (0.7706 vs. 0.7529, +1.77 pp) when thresholds are optimized individually. However, this setup is less robust than the primary configuration under a unified deployment threshold. Specifically, the best joint threshold for this sweep configuration ($\theta = 0.17$) yields F1 scores of 0.8518 on SHOT, 0.7581 on ClipShots, and 0.9598 on BBC, averaging 0.8566, which is lower than the primary deployment average of 0.8586 across the three datasets. Consequently, while the sweep results reveal domain-specific optimization potential, we retain the primary configuration for the main deployment results of the paper.
+
 \subsection{Controlled Component Analysis}
 
 All remaining analyses use Track 2: the controlled B4 replication whose
