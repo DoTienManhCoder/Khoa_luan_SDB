@@ -18,7 +18,14 @@
 Khóa luận tiếp cận bài toán theo hướng kế thừa một mạng xương sống SBD đã được tối ưu bằng Neural Architecture Search, sau đó tập trung cải thiện các thành phần ở tầng đầu ra. Cụ thể, AutoShot được dùng làm mô hình nền tảng; phần mạng xương sống được giữ nguyên để bảo toàn lợi ích của quá trình tìm kiếm kiến trúc, còn AutoShotV2 bổ sung ClassificationHead mới, Focal Loss, nhãn many-hot, temperature scaling và Gaussian smoothing nhằm xử lý mất cân bằng lớp, tăng tín hiệu giám sát quanh ranh giới và ổn định chuỗi xác suất dự đoán theo thời gian.
 
 \noindent
-Hai mục tiếp theo hệ thống hóa hai khối kiến thức nền tảng được khóa luận kế thừa: \textbf{(i)} các nguyên lý và kỹ thuật của Neural Architecture Search (Mục~\ref{sec:nas}) -- là công cụ trung tâm mà AutoShot vận dụng để tìm ra kiến trúc tối ưu cho SBD, và \textbf{(ii)} mô hình TransNetV2 (Mục~\ref{sec:transnetv2}) -- là mô hình cơ sở trực tiếp để khóa luận so sánh và cải tiến.
+Hai mục tiếp theo hệ thống hóa hai khối kiến thức nền tảng được khóa luận kế thừa: \textbf{(i)} các nguyên lý và kỹ thuật của Neural Architecture Search (Mục~\ref{sec:nas}) -- là công cụ trung tâm mà AutoShot vận dụng để tìm ra kiến trúc tối ưu cho SBD, và \textbf{(ii)} mô hình TransNetV2 (Mục~\ref{sec:transnetv2}) -- là mô hình cơ sở trực tiếp để khóa luận so sánh và cải tiến. Sơ đồ luồng xử lý và kiến trúc tổng quan của toàn bộ hệ thống được minh họa chi tiết trong Hình~\ref{fig:overall_flowchart}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{images/Flowchart.png}
+    \caption[Sơ đồ luồng xử lý tổng quan của hệ thống]{Sơ đồ luồng xử lý tổng quan của hệ thống phát hiện ranh giới cảnh quay AutoShot/AutoShotV2. Video đầu vào trải qua bước tiền xử lý, trích xuất đặc trưng kết hợp với nhánh tính độ tương đồng để tạo vector đặc trưng tổng hợp $4864$-chiều, sau đó qua các lớp kết nối đầy đủ và phân loại song song để dự đoán xác suất ranh giới.}
+    \label{fig:overall_flowchart}
+\end{figure}
 
 \section{Kỹ thuật tìm kiếm kiến trúc mạng nơ-ron}
 \label{sec:nas}
