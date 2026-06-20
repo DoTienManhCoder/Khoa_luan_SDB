@@ -59,6 +59,11 @@ def test_paper_snapshot_generated_tables_and_release_are_present():
     assert r"\newcommand{\PaperBFourVsAOneShotPP}{1.62}" in macros
     assert r"\newcommand{\PaperBFourVsAOneClipPP}{4.57}" in macros
     assert r"\PaperMainResultRows" in tables
+    assert (
+        r"AutoShotV2 (ours), per-dataset oracle best$^{\dagger}$ & "
+        r"\textbf{0.8607} & \textbf{0.9656} & \textbf{0.7706} \\" 
+        in tables
+    )
     assert r"\PaperAblationDeltaRows" in tables
     assert r"\textbf{+1.62}" in tables
     assert "no EMA" not in tables

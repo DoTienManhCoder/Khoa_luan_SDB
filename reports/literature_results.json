@@ -58,7 +58,7 @@
     },
     {
       "id": "autoshot_reproduced_legacy",
-      "name": "AutoShot tự chạy lại A0",
+      "name": "AutoShot tự chạy lại",
       "source_kind": "legacy_result",
       "source": "AutoShots_Report working tree, 2026-06-06",
       "metrics": {
