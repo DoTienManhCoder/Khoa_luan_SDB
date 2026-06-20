@@ -13,7 +13,6 @@ build/
 venv/
 
 # Training and inference artifacts
-*.pth
 *.pt
 *.pkl
 *.pickle
@@ -39,7 +38,6 @@ reports/figures/bbc_smoke/
 _smoke_out/
 
 # Web runtime artifacts
-artifacts/models/*
 !artifacts/models/README.md
 apps/web/backend/storage/
 apps/web/frontend/node_modules/
