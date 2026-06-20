@@ -354,7 +354,7 @@ def render_paper_tex_tables(manifest: dict[str, Any]) -> str:
         ("dsm_reported", "Deep Structured Models (DSM)"),
         ("transnet_reported", "TransNet (V1)"),
         ("transnetv2_reproduced", "TransNetV2, reproduced"),
-        ("autoshot_reproduced_legacy", "AutoShot, reproduced A0"),
+        ("autoshot_reproduced_legacy", "AutoShot, reproduced"),
     )
     for identifier, label in comparison_definitions:
         metrics = comparisons[identifier]["metrics"]
@@ -367,7 +367,7 @@ def render_paper_tex_tables(manifest: dict[str, Any]) -> str:
     deploy = comparisons["autoshotv2_deploy"]["metrics"]
     best_sweep = comparisons["autoshotv2_best_sweep"]["metrics"]
     comparison_rows += [
-        "AutoShotV2 (ours), fixed deployment & "
+        "AutoShotV2 (ours), fixed deploy & "
         f"{paper_metric(deploy['shot'])} & "
         f"{paper_metric(deploy['bbc'], True)} & "
         f"{paper_metric(deploy['clipshots'])} " r"\\",
