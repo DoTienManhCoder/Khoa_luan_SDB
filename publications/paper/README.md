@@ -40,9 +40,9 @@ Artifact chuẩn: `publications/paper/releases/AutoShotV2_Paper.pdf`.
 
 Paper báo cáo theo **hai track**:
 
-- **Track 1 — deploy checkpoint (headline)**: cấu hình cố định
+- **Track 1 — deploy checkpoint (fixed-threshold deployment analysis)**: cấu hình cố định
   T*=0.3878, sigma=2.0, threshold=0.10 → F1 0.8545 SHOT / 0.9656 BBC /
-  0.7530 ClipShots (best sweep 0.7557 báo cáo riêng). Tier result-JSON:
+  0.7529 ClipShots (per-dataset operating point báo cáo riêng). Tier result-JSON:
   chỉ còn result JSON đã checksum, không còn test logits.
 - **Track 2 — controlled replication (B4)**: head BCE train lại theo
   frozen validation-only protocol (T=0.6618) với đầy đủ logit cache.

@@ -134,8 +134,8 @@ On ClipShots, the peak F1 score of 0.7706 (Table~\ref{tab:extra_sweep_peaks}) al
 \draw (0,0) -- (0,2.7);
 \end{tikzpicture}
 \caption{F1 comparison on SHOT. AutoShotV2 outperforms the reproduced
-AutoShot baseline by \PaperBestVsAutoShotPP{} pp and the reported
-TransNetV2 baseline by \PaperBestVsTransNetPP{} pp.}
+AutoShot by \PaperBestVsAutoShotPP{} pp and reported TransNetV2
+by \PaperBestVsTransNetPP{} pp.}
 \label{fig:bars}
 \end{figure}
 
@@ -172,7 +172,7 @@ As shown in Table~\ref{tab:extra_sweep_peaks}, this supplemental configuration a
 
 Specifically, the "per-dataset oracle best" row in Table~\ref{tab:overall} consolidates these peak outcomes by selecting the best F1 score per dataset across both the primary and supplemental configurations. This yields 0.8607 on SHOT (from the supplemental configuration), 0.7706 on ClipShots (from the supplemental configuration), and 0.9656 on BBC (from the primary deployment configuration, which outperforms the 0.9648 achieved by the supplemental configuration).
 
-However, this supplemental setup is less robust than the primary configuration under a unified deployment threshold. For example, the best joint threshold for this supplemental configuration ($\theta = 0.17$) yields F1 scores of 0.8518 on SHOT, 0.7581 on ClipShots, and 0.9598 on BBC, resulting in an average F1 of 0.8566. This joint performance is lower than the primary deployment average of 0.8577 across the three datasets. Consequently, while these results reveal domain-specific optimization potential, we retain the primary configuration for the main deployment results of the paper.
+However, this supplemental setup is less robust than the primary configuration under a unified deployment threshold. For example, the best joint threshold for this supplemental configuration ($\theta = 0.17$) yields F1 scores of 0.8518 on SHOT, 0.7581 on ClipShots, and 0.9598 on BBC, resulting in an average F1 of 0.8566. This joint performance is lower than the primary deployment average of 0.8577 across the three datasets. Consequently, while these results reveal domain-specific optimization potential, we retain the primary configuration for the fixed-threshold deployment analysis.
 
 \subsection{Controlled Component Analysis}
 

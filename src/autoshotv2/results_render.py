@@ -300,7 +300,7 @@ def render_paper_tex_macros(manifest: dict[str, Any]) -> str:
     analysis = manifest["supplemental_results"]["paper_analysis"]
     protocol = analysis["protocol"]
     definitions = {
-        # Two operating points coexist: the deployed checkpoint (headline)
+        # Two operating points coexist: the deployed checkpoint (fixed-deployment analysis)
         # and the controlled B4 replication (ablation/seed-study track).
         "PaperDeployTemperature": f"{deployment['temperature']:.4f}",
         "PaperBFourTemperature": f"{protocol['temperature']:.4f}",
