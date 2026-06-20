@@ -84,12 +84,12 @@ avoid mixing absolute scales, replication analyses are reported as
 \emph{differences} against the internal BCE control (A1), while absolute F1
 values for deployment in the paper refer to the deployed checkpoint.
 
-\subsection{Main Results Under Per-Dataset Configuration and Operating-Point Selection}
+\subsection{Main Results and Deployment Analysis}
 \label{subsec:main_results}
 
-Table~\ref{tab:overall} reports the main comparison under per-dataset configuration and operating-point selection. This protocol selects the best configuration and decision threshold for each evaluation dataset to estimate the best attainable performance of the frozen-feature refinement pipeline. Because this protocol is not a single-threshold deployment setting, we report the fixed deployment results separately in Section~\ref{subsec:fixed_deploy}.
+Table~\ref{tab:overall} reports the main comparison under oracle upper-bound configuration and operating-point selection. This protocol selects the best configuration and decision threshold for each evaluation dataset to estimate the best attainable performance of the frozen-feature refinement pipeline. Because this protocol is not a single-threshold deployment setting, we report the fixed deployment results separately below.
 
-Under this per-dataset configuration and operating-point selection protocol, AutoShotV2 reaches peak F1 scores of 0.8607 on SHOT, 0.9656 on BBC, and 0.7706 on ClipShots. These outcomes outperform the reproduced AutoShot baseline (0.8405 on SHOT, 0.9554 on BBC, and 0.7649 on ClipShots) by 2.02, 1.02, and 0.57 percentage points, respectively. On BBC, this configuration outperforms the reproduced TransNetV2 baseline (0.9593) by 0.63 percentage points.
+Under this oracle protocol, AutoShotV2 reaches peak F1 scores of 0.8607 on SHOT, 0.9656 on BBC, and 0.7706 on ClipShots. These outcomes outperform the reproduced AutoShot baseline (0.8405 on SHOT, 0.9554 on BBC, and 0.7649 on ClipShots) by 2.02, 1.02, and 0.57 percentage points, respectively. On BBC, this configuration outperforms the reproduced TransNetV2 baseline (0.9593) by 0.63 percentage points.
 
 On ClipShots, the peak F1 score of 0.7706 (Table~\ref{tab:extra_sweep_peaks}) also outperforms the reported literature scores of DSM (0.7030) by 6.76 percentage points and TransNet (V1) (0.7350) by 3.56 percentage points, and exceeds the reproduced TransNetV2 baseline (0.7454) by 2.52 percentage points. To distinguish protocol sources, baseline labels indicate whether they are cited from literature or evaluated within our pipeline. Specifically, reproduced baselines are evaluated using our pipeline, whereas reported baselines (for DSM, TransNet, and TransNetV2 on SHOT) are cited from their original publications. Note that the TransNetV2 model was not evaluated on SHOT in the original work; the reported SHOT score of 0.7993 is cited from \cite{zhu2023autoshot}.
 
@@ -109,25 +109,19 @@ On ClipShots, the peak F1 score of 0.7706 (Table~\ref{tab:extra_sweep_peaks}) al
 \end{tabular}
 }
 \vspace{0.5ex}
-\noindent{\footnotesize $^\dagger$ Main result under per-dataset configuration and operating-point selection. Thresholds are optimized separately for each dataset to estimate dataset-specific attainable performance. BBC uses the primary deployment configuration because it exceeds the supplemental BBC peak. Fixed-threshold deployment results are reported in the preceding row.}
+\noindent{\footnotesize $^\dagger$ Oracle upper-bound result under per-dataset best selection across the evaluated AutoShotV2 configurations. SHOT and ClipShots use the supplemental configuration; BBC uses the primary deployment configuration because it exceeds the supplemental BBC peak. Fixed-threshold deployment results are reported in the preceding row.}
 \end{table}
 
+\paragraph{Fixed-threshold deployment}
+Under a single fixed deployment threshold ($\theta = \PaperDeployThreshold$), AutoShotV2 achieves 0.8545 on SHOT, 0.9656 on BBC, and 0.7529 on ClipShots. Performance on SHOT and BBC remains strong, but the ClipShots drop from 0.7706 to 0.7529 highlights that domain-specific operating-point selection accounts for the remaining gap.
 
-
-\subsection{Fixed-Threshold Deployment Analysis}
-\label{subsec:fixed_deploy}
-
-To assess deployment robustness under real-world conditions where domain-specific threshold tuning may not be feasible, we evaluate AutoShotV2 under a single, unified decision threshold ($\theta = \PaperDeployThreshold$). Under this fixed deployment setting, AutoShotV2 achieves F1 scores of 0.8545 on SHOT, 0.9656 on BBC, and 0.7529 on ClipShots. 
-
-While the fixed deployment threshold maintains strong robustness and competitive performance on SHOT and BBC, it reveals a notable precision bottleneck on open-world video footage. Specifically, on ClipShots, the dataset-specific operating point reaches 0.7706, exceeding the reproduced AutoShot baseline by 0.57 percentage points. However, under the single fixed deployment threshold, the score drops to 0.7529, indicating that the main remaining challenge is domain-specific operating-point selection and false-positive control under open-world effects.
-
-\subsection{Supplemental Configuration and Oracle Analysis}
+\subsection{Supplemental Oracle Analysis}
 \label{sec:oracle_sweep}
 
-In addition to the primary AutoShotV2 configuration, we conduct an oracle analysis using a supplemental configuration with a revised training and post-processing setup. Specifically, we set $T^* = 0.2413$, $\sigma = 2.0$, Focal Loss parameters $\gamma = 2.0$ and $\alpha = 0.6$, many-hot supervision weight to $0.3$, learning rate to $7 \times 10^{-6}$, and weight decay to $10^{-4}$. The goal is to investigate whether increasing the focusing parameter of Focal Loss ($\gamma = 2.0$ vs. $1.0$) and reducing the learning rate can yield higher peak F1 scores when the decision threshold is optimized independently for each target dataset (oracle thresholding).
+A supplemental configuration ($T^* = 0.2413$, $\sigma = 2.0$, Focal Loss $\gamma = 2.0$, $\alpha = 0.6$, many-hot weight $0.3$, learning rate $7 \times 10^{-6}$) investigates whether stronger focusing and a lower learning rate improve peak F1 under a per-dataset upper-bound threshold sweep.
 
 \begin{table}[!t]
-\caption{Peak F1 Scores Under Oracle Analysis of the Supplemental Configuration}
+\caption{Peak F1 Scores Under Oracle Upper-Bound Analysis of the Supplemental Configuration}
 \label{tab:extra_sweep_peaks}
 \centering
 \small
@@ -143,11 +137,7 @@ BBC & 0.12 & 0.9668 & 0.9628 & 0.9648 \\
 \end{tabular}
 \end{table}
 
-As shown in Table~\ref{tab:extra_sweep_peaks}, this supplemental configuration achieves superior peak F1 scores on SHOT (0.8607 vs. 0.8545, a gain of 0.62 percentage points) and ClipShots (0.7706 vs. 0.7529, a gain of 1.77 percentage points) when decision thresholds are optimized individually for each dataset.
-
-Specifically, the "per-dataset oracle best" row in Table~\ref{tab:overall} consolidates these peak outcomes by selecting the best F1 score per dataset across both the primary and supplemental configurations. This yields 0.8607 on SHOT (from the supplemental configuration), 0.7706 on ClipShots (from the supplemental configuration), and 0.9656 on BBC (from the primary deployment configuration, which outperforms the 0.9648 achieved by the supplemental configuration).
-
-However, this supplemental setup is less robust than the primary configuration under a unified deployment threshold. For example, the best joint threshold for this supplemental configuration ($\theta = 0.17$) yields F1 scores of 0.8518 on SHOT, 0.7581 on ClipShots, and 0.9598 on BBC, resulting in an average F1 of 0.8566. This joint performance is lower than the primary deployment average of 0.8577 across the three datasets. Consequently, while these results reveal domain-specific optimization potential, we retain the primary configuration for the fixed-threshold deployment analysis.
+Table~\ref{tab:extra_sweep_peaks} shows that the supplemental configuration yields higher peaks on SHOT (+0.62~pp) and ClipShots (+1.77~pp) than the primary configuration. The ``per-dataset best'' row in Table~\ref{tab:overall} selects the best source per dataset: SHOT and ClipShots from the supplemental configuration, BBC from the primary (0.9656 vs.\ 0.9648). However, under a unified threshold ($\theta = 0.17$) the supplemental average F1 (0.8566) falls below the primary deployment average (0.8577), so we retain the primary configuration for fixed-threshold deployment.
 
 \subsection{Controlled Component Analysis}
 
@@ -238,14 +228,7 @@ diagnostics rather than as untouched calibration estimates.
 \end{tabular}
 \end{table}
 
-\begin{figure}[!t]
-\centering
-\includegraphics[width=\columnwidth]{reliability_diagram.png}
-\caption{Reliability diagram on the combined validation split. Temperature
-scaling reduces aggregate error. Equal-mass bins expose sparsely populated
-confidence regions.}
-\label{fig:reliability}
-\end{figure}
+A reliability diagram is provided in the supplementary artifacts.
 
 Table~\ref{tab:test_calibration} reports test-set calibration using the
 temperature selected on validation. ClipShots has the largest B-ECE despite
@@ -319,37 +302,7 @@ so we do not estimate or reconstruct it.
 \end{tabular}
 \end{table}
 
-\subsection{ClipShots Transition-Type Recall}
 
-We regenerate the ClipShots breakdown directly from the B4 logits and
-\texttt{test.json}. One malformed annotation with reversed endpoints is
-normalized by sorting the pair. A ground-truth interval is a cut when its
-width is at most one frame and gradual otherwise. Predictions are
-class-agnostic, so they are matched once and recall is grouped by the matched
-ground-truth type. Type-specific precision and F1 are not reported because the
-model does not predict a transition type.
-
-\begin{table}[!t]
-\caption{ClipShots Recall by Ground-Truth Transition Type}
-\label{tab:clipshots_breakdown}
-\centering
-\small
-\renewcommand{\arraystretch}{1.08}
-\resizebox{\columnwidth}{!}{%
-\begin{tabular}{L{0.8in}C{0.7in}C{0.65in}C{0.65in}C{0.65in}}
-\toprule
-\textbf{Type} & \textbf{GT} & \textbf{Matched} & \textbf{Missed} & \textbf{Recall} \\
-\midrule
-\PaperClipBreakdownRows
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
-The gradual-transition recall of 0.8089 is lower than the cut recall of
-0.8991, but it is not the dominant source of the overall ClipShots gap.
-The remaining gap is instead associated with false-positive peaks under
-open-world effects and domain shift.
 
 \subsection{Training-Seed Robustness}
 \label{sec:seed_robustness}
@@ -374,19 +327,15 @@ Table~\ref{tab:ablation}.
 
 \subsection{Limitations}
 
-The study has five important limitations. First, although the deployment
-checkpoint logits have been regenerated from complete local video splits, the
-three-seed study of Section~\ref{sec:seed_robustness} measures optimization
-variability for the controlled pipeline and does not reproduce either
-checkpoint bit for bit. Second, the historical sample cache recorded 400
+The study has four important limitations. First, the historical sample cache recorded 400
 videos and 33,174 frames but not the selected IDs; the current manifests fix
-this for future runs but cannot reconstruct the old cache contents. Third,
-validation calibration diagnostics reuse the temperature-selection data.
-Fourth, the frozen representation does not fully control cross-domain false
+this for future runs but cannot reconstruct the old cache contents. Second,
+validation calibration diagnostics reuse the temperature-selection data. Third,
+the frozen representation does not fully control cross-domain false
 positives on ClipShots. An exploratory experiment that partially unfroze the
 layer nearest to the classification head reached a ClipShots F1 of 0.7962
 but degraded BBC to 0.9341, confirming a multi-domain trade-off that the
 fully-frozen regime avoids at the cost of lower ClipShots precision. This
 trade-off is not analyzed further in the present paper, which focuses
 exclusively on the frozen-feature setting.
-Fifth, the main comparison under per-dataset operating-point selection represents an optimistic upper bound (domain-specific threshold tuning) rather than a single unified deployment setting. In practice, finding domain-specific thresholds requires labeled test data from the target distribution, meaning that the peak F1 scores of 0.8607 on SHOT and 0.7706 on ClipShots should be interpreted as potential estimates of frozen-feature capability rather than out-of-the-box deployment results.
+Fourth, the main comparison is an oracle upper-bound analysis with domain-specific threshold tuning rather than a single unified deployment setting. In practice, finding domain-specific thresholds requires labeled data from the target distribution, meaning that the peak F1 scores of 0.8607 on SHOT and 0.7706 on ClipShots should be interpreted as potential estimates of frozen-feature capability rather than out-of-the-box deployment results.

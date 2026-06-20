@@ -42,6 +42,9 @@ if ($Target -eq "pdf") {
         if ($LASTEXITCODE -ne 0) { throw "Second pdflatex pass failed." }
 
         & pdflatex -interaction=nonstopmode -halt-on-error -output-directory=build main.tex
+        if ($LASTEXITCODE -ne 0) { throw "Third pdflatex pass failed." }
+
+        & pdflatex -interaction=nonstopmode -halt-on-error -output-directory=build main.tex
         if ($LASTEXITCODE -ne 0) { throw "Final pdflatex pass failed." }
     }
     finally {
