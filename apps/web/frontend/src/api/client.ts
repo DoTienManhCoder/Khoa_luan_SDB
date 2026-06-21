@@ -45,13 +45,15 @@ export type AutoShotJob = {
   };
   processing: {
     model: string;
-    sensitivity: string;
+    display_name?: string;
+    preset?: string;
+    device?: string;
+    backend?: string;
     threshold?: number;
     temperature?: number;
     sigma?: number;
-    min_scene_duration_sec: number;
-    device?: string;
-    backend?: string;
+    sensitivity?: string;
+    min_scene_duration_sec?: number;
     checkpoint?: string;
   };
   storage?: {
