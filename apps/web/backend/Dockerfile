@@ -21,7 +21,6 @@ COPY src ./src
 RUN pip install --no-cache-dir --no-deps .
 
 COPY apps/web/backend ./apps/web/backend
-COPY artifacts/models /app/models
 
 WORKDIR /app/apps/web/backend
 
